@@ -14,7 +14,7 @@ concurrency:
 
 jobs:
   save-entry:
-    if: contains(github.event.issue.labels.*.name, 'daily-log')
+    if: startsWith(github.event.issue.title, 'Daily log:')
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
