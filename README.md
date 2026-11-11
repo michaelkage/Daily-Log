@@ -26,7 +26,7 @@ Fetch [latest.json](latest.json) for the latest highlight, entry URL, total log 
 
 ### Configuration
 
-Set the repository variable `GH_ACTIVITY_REPOS` to a comma- or newline-separated list of `owner/repository` names to include activity from other repositories. For private or cross-repository access, add a `GH_ACTIVITY_TOKEN` Actions secret with read access to those repositories. Without it, activity collection uses the workflow's repository-scoped token.
+Add a `GH_ACTIVITY_TOKEN` Actions secret containing a fine-grained personal access token with read-only **Contents**, **Pull requests**, and **Metadata** permissions for the repositories you want scanned. The daily collector discovers repositories available to that token automatically; no repository list is required. A repository is recorded only when it has at least one commit in the previous 24 hours, then its commit details and any merged PRs/releases from that same window are added. Repositories with no commits are skipped. Optionally set `GH_ACTIVITY_REPOS` to add specific `owner/repository` names. Without `GH_ACTIVITY_TOKEN`, only this repository and explicitly configured repositories can be scanned.
 
 <!-- END -->
 

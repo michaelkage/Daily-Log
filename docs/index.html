@@ -305,9 +305,9 @@ README.md               generated dashboard</div>
         <p style="font-size:9px;color:var(--stone)">Workflows provide these from <code>secrets.GITHUB_TOKEN</code> and <code>github.repository</code>. They are not committed to the repository.</p>
       </div>
       <div class="arch-box">
-        <h3>Optional cross-repository activity</h3>
-        <div class="command"><code>GH_ACTIVITY_REPOS=owner/repo-a,owner/repo-b<br>GH_ACTIVITY_TOKEN=read-only-token</code></div>
-        <p style="font-size:9px;color:var(--stone)">Set <code>GH_ACTIVITY_REPOS</code> as an Actions variable and <code>GH_ACTIVITY_TOKEN</code> as a secret. If absent, the activity reader falls back to <code>GITHUB_TOKEN</code>. Writes always use <code>GITHUB_TOKEN</code>.</p>
+        <h3>Automatic cross-repository discovery</h3>
+        <div class="command"><code>GH_ACTIVITY_TOKEN=read-only-token</code></div>
+        <p style="font-size:9px;color:var(--stone)">Add this as an Actions secret: a fine-grained token with read-only Contents, Pull requests, and Metadata access to the repositories to scan. The collector discovers accessible repositories automatically. GH_ACTIVITY_REPOS is optional for extra explicit repositories. Only repositories with at least one commit in the last 24 hours are logged; quiet repositories are skipped. Writes always use GITHUB_TOKEN.</p>
       </div>
     </div>
     <section class="arch-box" style="margin-top:14px">
