@@ -1,7 +1,6 @@
 name: Daily log
 description: Capture what shipped, what you learned, blockers, and the next move.
 title: "Daily log: "
-labels: ["daily-log"]
 body:
   - type: input
     id: date
