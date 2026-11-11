@@ -61,6 +61,8 @@ Set the repository variable `GH_ACTIVITY_REPOS` to a comma- or newline-separated
 ## About
 
 This repository documents daily engineering progress and lessons learned, building in public one commit at a time.
+
+_Repository established February 3, 2026. The original launch notes remain in the repository history._
 `;
 const readme = await getFile("README.md");
 if (!readme) throw new Error("README.md is missing.");
