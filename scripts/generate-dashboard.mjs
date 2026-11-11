@@ -90,7 +90,7 @@ await putFile("latest.json", `${JSON.stringify(latestPayload, null, 2)}\n`, "doc
 console.log(`Dashboard updated: ${total} logs, ${streak}-day current streak.`);
 
 function extractHighlight(markdown) {
-  const headings = ["Shipped", "What I Built", "Shipped Today", "Highlight"];
+  const headings = ["Shipped", "What I Built", "Highlight"];
   for (const heading of headings) {
     const pattern = new RegExp(`^###? [^\\n]*${heading}[^\\n]*\\n+([\\s\\S]*?)(?=^###? |^---|$)`, "im");
     const match = markdown.match(pattern);
