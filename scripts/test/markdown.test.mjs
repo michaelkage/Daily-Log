@@ -35,7 +35,7 @@ test("keeps later sections and activity markers outside the replaced section", (
 test("appends a missing section using a level-two heading", () => {
   const result = replaceMarkdownSection("# Daily Log\n", "Learned", "- A lesson.");
 
-  assert.match(result, /## Learned\n- A lesson\.$/);
+  assert.match(result, /## Learned\n- A lesson\.\n$/);
 });
 
 test("matches headings literally rather than treating punctuation as regex syntax", () => {
