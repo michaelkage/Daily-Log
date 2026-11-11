@@ -18,7 +18,7 @@ test("account discovery paginates and combines discovered and configured reposit
   const calls = [];
   const api = async (path) => {
     calls.push(path);
-    if (path.includes("page=1")) return Array.from({ length: 100 }, (_, i) => ({ full_name: "owner/repo-" + i }));
+    if (new URL("https://example.test" + path).searchParams.get("page") === "1") return Array.from({ length: 100 }, (_, i) => ({ full_name: "owner/repo-" + i }));
     return [{ full_name: "owner/last" }];
   };
   const repos = await discoverRepositories(api, "owner/daily-log", ["owner/extra"], true);
