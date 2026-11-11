@@ -5,7 +5,7 @@ export function replaceMarkdownSection(markdown, heading, value) {
   }
   if (typeof value !== "string") throw new TypeError("value must be a string.");
 
-  const escaped = heading.replace(/[.*+?^{}()|[\]\\]/g, "\\$&");
+  const escaped = heading.replace(/[.*+?^{}()|[\]\\]/g, "\\$&").replaceAll("$", "\\$");
   const headingPattern = new RegExp("^(#{1,6})[ \\t]+" + escaped + "[ \\t]*\\r?$", "gm");
   const match = headingPattern.exec(markdown);
 
