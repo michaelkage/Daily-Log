@@ -30,6 +30,7 @@ jobs:
         run: node scripts/collect-activity.mjs
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_ACTIVITY_TOKEN: ${{ secrets.GH_ACTIVITY_TOKEN }}
           GITHUB_REPOSITORY: ${{ github.repository }}
           GH_ACTIVITY_REPOS: ${{ vars.GH_ACTIVITY_REPOS }}
       - name: Rebuild dashboard
