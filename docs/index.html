@@ -145,7 +145,7 @@ td code,code{font-family:var(--mono);font-size:.95em;background:var(--soft);padd
 <main class="shell">
   <div class="buildline">
     <span><i class="state-dot"></i><strong>Build state</strong> · main · automation repository</span>
-    <span id="build-meta">HEAD bc f81dd · no published release</span>
+    <span id="build-meta">HEAD bcf81dd · no published release</span>
   </div>
   <section class="intro" id="manual">
     <div class="intro-copy">
@@ -168,7 +168,7 @@ td code,code{font-family:var(--mono);font-size:.95em;background:var(--soft);padd
     <div class="demo-grid">
       <div class="demo-input">
         <div class="demo-topline"><strong>Issue form input</strong><span class="status">Simulated issue close</span></div>
-        <label class="field"><span>Log date (UTC)</span><input id="log-date" type="date"></label>
+        <label class="field"><span>Simulation date (UTC)</span><input id="log-date" type="date"></label>
         <label class="field"><span>Shipped</span><textarea id="shipped" placeholder="- Shipped a feature"></textarea></label>
         <label class="field"><span>Learned</span><textarea id="learned" placeholder="- Learned a useful lesson"></textarea></label>
         <div class="field-row">
@@ -622,6 +622,9 @@ README.md               generated dashboard</div>
       $("commit-detail").textContent=commit.status==="rejected"?commit.reason.message:"No commit returned.";
     }
     const failures=requests.filter(x=>x.status==="rejected");
+    const releaseLabel=release.status==="fulfilled"?(release.value.tag_name||release.value.name||"release"):(release.reason.status===404?"no published release":"release status unknown");
+    const commitLabel=commit.status==="fulfilled"&&commit.value.length?commit.value[0].sha.slice(0,7):"commit unknown";
+    $("build-meta").textContent="HEAD "+commitLabel+" · "+releaseLabel;
     status(failures.length?failures.length+" of 3 GitHub API requests failed. Details are shown above.":"GitHub repository, latest release and latest commit loaded successfully.",failures.length>0);
   }
   $("refresh-api").addEventListener("click",loadGitHub);
