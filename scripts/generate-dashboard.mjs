@@ -27,9 +27,10 @@ const recent = await Promise.all(entries.slice(0, 10).map(async (entry) => {
   const highlight = extractHighlight(file.content);
   const tags = [...file.content.matchAll(/(?:^|\s)#([a-zA-Z0-9_-]+)/g)].map((match) => match[1]).slice(0, 4);
   const label = highlight || "Daily engineering log";
-  return `| [${entry.date}](${entry.path}) | ${escapeCell(label)} | ${tags.length ? tags.map((tag) => `\`#${tag}\``).join(" ") : "—"} |`;
+  return { date: entry.date, path: entry.path, highlight: label, tags };
 }));
 const rows = recent.filter(Boolean);
+const latest = rows[0] ?? null;
 const dashboard = `<!-- START -->
 ## 📊 Engineering Dashboard
 
@@ -42,7 +43,7 @@ Public engineering journal — experiments, shipped work, lessons, and next step
 
 | Date (UTC) | Highlight | Tags |
 |---|---|---|
-${rows.length ? rows.join("\n") : "| No entries yet | Your first log will appear here | — |"}
+${rows.length ? rows.map((item) => `| [${item.date}](${item.path}) | ${escapeCell(item.highlight)} | ${item.tags.length ? item.tags.map((tag) => `\`#${tag}\``).join(" ") : "—"} |`).join("\n") : "| No entries yet | Your first log will appear here | — |"}
 
 ### Archive
 
@@ -67,6 +68,21 @@ _Repository established February 3, 2026. The original launch notes remain in th
 const readme = await getFile("README.md");
 if (!readme) throw new Error("README.md is missing.");
 await putFile("README.md", dashboard, "docs: refresh engineering dashboard", readme.sha);
+const latestPayload = {
+  schema_version: 1,
+  generated_at: new Date().toISOString(),
+  total_logs: total,
+  current_streak: streak,
+  latest_entry: latest ? {
+    date: latest.date,
+    path: latest.path,
+    highlight: latest.highlight,
+    tags: latest.tags,
+    url: `https://github.com/${process.env.GITHUB_REPOSITORY}/blob/main/${latest.path}`,
+  } : null,
+};
+const latestFile = await getFile("latest.json");
+await putFile("latest.json", `${JSON.stringify(latestPayload, null, 2)}\\n`, "docs: publish machine-readable latest log", latestFile?.sha);
 console.log(`Dashboard updated: ${total} logs, ${streak}-day current streak.`);
 
 function extractHighlight(markdown) {
