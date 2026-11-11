@@ -55,7 +55,7 @@ Browse the complete history in [logs/](logs/) and weekly reviews in [weekly/](we
 
 ### Configuration
 
-Set the repository variable \\`GH_ACTIVITY_REPOS\\` to a comma- or newline-separated list of \\`owner/repository\\` names to include activity from other repositories. For private or cross-repository access, add a \\`GH_ACTIVITY_TOKEN\\` Actions secret with read access to those repositories. Without it, activity collection uses the workflow's repository-scoped token.
+Set the repository variable \`GH_ACTIVITY_REPOS\` to a comma- or newline-separated list of \`owner/repository\` names to include activity from other repositories. For private or cross-repository access, add a \`GH_ACTIVITY_TOKEN\` Actions secret with read access to those repositories. Without it, activity collection uses the workflow's repository-scoped token.
 
 <!-- END -->
 
@@ -82,7 +82,7 @@ const latestPayload = {
   } : null,
 };
 const latestFile = await getFile("latest.json");
-await putFile("latest.json", `${JSON.stringify(latestPayload, null, 2)}\\n`, "docs: publish machine-readable latest log", latestFile?.sha);
+await putFile("latest.json", `${JSON.stringify(latestPayload, null, 2)}\n`, "docs: publish machine-readable latest log", latestFile?.sha);
 console.log(`Dashboard updated: ${total} logs, ${streak}-day current streak.`);
 
 function extractHighlight(markdown) {
