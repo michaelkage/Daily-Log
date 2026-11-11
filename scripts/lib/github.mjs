@@ -52,6 +52,13 @@ export async function putFile(path, content, message, sha) {
   });
 }
 
+export async function deleteFile(path, sha, message) {
+  return api(`/repos/${owner}/${repo}/contents/${encodePath(path)}`, {
+    method: "DELETE",
+    body: JSON.stringify({ message, sha }),
+  });
+}
+
 export async function getTree() {
   const repositoryData = await api(`/repos/${owner}/${repo}`);
   return api(`/repos/${owner}/${repo}/git/trees/${repositoryData.default_branch}?recursive=1`);
