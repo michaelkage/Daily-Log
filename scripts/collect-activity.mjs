@@ -34,7 +34,7 @@ for (const fullName of repositories) {
     const recentReleases = releases.filter((item) => item.published_at && item.published_at >= since.toISOString() && item.published_at <= until.toISOString());
     for (const item of recentCommits) {
       const message = item.commit.message.split("\n")[0].replaceAll("\r", "");
-      const isLogNote = /\\[log\\]/i.test(message);
+      const isLogNote = /\[log\]/i.test(message);
       const category = isLogNote ? " log note" : "";
       sections.push(`- **${fullName}${category}** — [${escapeMarkdown(message)}](${item.html_url})`);
     }
