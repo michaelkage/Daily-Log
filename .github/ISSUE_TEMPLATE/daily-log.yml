@@ -1,0 +1,36 @@
+name: Daily log
+description: Capture what shipped, what you learned, blockers, and the next move.
+title: "Daily log: "
+body:
+  - type: input
+    id: date
+    attributes:
+      label: Log date (UTC)
+      description: YYYY-MM-DD. Leave blank to use today (UTC).
+      placeholder: "2026-11-11"
+  - type: textarea
+    id: shipped
+    attributes:
+      label: Shipped
+      description: What did you complete or move forward?
+      placeholder: "- "
+    validations:
+      required: true
+  - type: textarea
+    id: learned
+    attributes:
+      label: Learned
+      description: New insight, technique, or lesson.
+      placeholder: "- "
+  - type: textarea
+    id: blockers
+    attributes:
+      label: Blockers
+      description: What is stuck, and why?
+      placeholder: "- "
+  - type: textarea
+    id: tomorrow
+    attributes:
+      label: Tomorrow
+      description: The highest-value next steps.
+      placeholder: "- "
