@@ -21,6 +21,11 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
+      - name: Migrate legacy root-level daily entries
+        run: node scripts/migrate-legacy-logs.mjs
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
       - name: Create today's entry
         run: node scripts/create-daily-log.mjs
         env:
