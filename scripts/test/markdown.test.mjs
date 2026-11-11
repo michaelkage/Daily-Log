@@ -45,3 +45,29 @@ test("matches headings literally rather than treating punctuation as regex synta
   assert.match(result, /## What \(I\) built\n- new\n\n## Next/);
   assert.doesNotMatch(result, /- old/);
 });
+
+test("removes duplicate sections left by older capture runs", () => {
+  const source = [
+    "# Daily Log",
+    "",
+    "## Shipped",
+    "- old original",
+    "",
+    "## Learned",
+    "- learned",
+    "",
+    "### Shipped",
+    "- stale duplicate",
+    "",
+    "### Learned",
+    "- stale duplicate lesson",
+    "",
+    "---",
+    "",
+  ].join("\n");
+  const result = replaceMarkdownSection(source, "Shipped", "- corrected");
+
+  assert.equal((result.match(/^#{2,6} Shipped$/gm) ?? []).length, 1);
+  assert.doesNotMatch(result, /stale duplicate/);
+  assert.match(result, /## Learned\n- learned/);
+});
