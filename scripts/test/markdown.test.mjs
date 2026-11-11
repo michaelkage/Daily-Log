@@ -72,5 +72,5 @@ test("removes duplicate sections left by older capture runs", () => {
 
   assert.equal((result.match(/^#{2,6} Shipped$/gm) ?? []).length, 1);
   assert.doesNotMatch(result, /stale duplicate/);
-  assert.match(result, /## Learned\n- learned/);
+  assert.match(result, /## Learned\n- corrected learned/);
 });
