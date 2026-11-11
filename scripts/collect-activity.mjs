@@ -1,4 +1,4 @@
-import { api, getFile, putFile } from "./lib/github.mjs";
+import { activityApi as api, getFile, putFile } from "./lib/github.mjs";
 
 const repository = process.env.GITHUB_REPOSITORY;
 const [owner, repo] = repository.split("/");
@@ -57,5 +57,5 @@ await putFile(path, content, `chore(log): enrich ${date} with GitHub activity`, 
 console.log(`Recorded ${sections.length} activity item(s) from ${repositories.length} repository/repositories.`);
 
 function escapeMarkdown(value) {
-  return String(value).replaceAll("[", "\\[").replaceAll("]", "\\]").replaceAll("|", "\\|");
+  return String(value).replaceAll("\\", "\\\\").replaceAll("[", "\\[").replaceAll("]", "\\]").replaceAll("(", "\\(").replaceAll(")", "\\)").replaceAll("|", "\\|");
 }
