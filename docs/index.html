@@ -1,0 +1,670 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="color-scheme" content="light">
+<meta name="description" content="Daily-Log: an automated engineering journal built with GitHub Actions, Node.js 22 and Markdown. Interactive manual and local pipeline simulation.">
+<title>Daily-Log — system manual</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;450;500;600&family=Newsreader:opsz,wght@6..72,400;6..72,500;6..72,600&display=swap" rel="stylesheet">
+<style>
+:root{--paper:#F4F1EA;--ink:#141413;--stone:#57554E;--line:#c9c4b9;--soft:#e9e5dc;--red:#D9381E;--green:#315c42;--mono:"IBM Plex Mono",ui-monospace,SFMono-Regular,Consolas,monospace;--serif:"Newsreader",Georgia,serif;--measure:1240px}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--paper);color:var(--ink);font:14px/1.55 var(--mono);font-feature-settings:"tnum" 1}
+a{color:inherit;text-decoration-thickness:1px;text-underline-offset:3px}
+a:hover{color:var(--red)}
+button,input,textarea,select{font:inherit}
+button{cursor:pointer}
+button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px solid var(--red);outline-offset:3px}
+.shell{width:min(var(--measure),calc(100% - 48px));margin-inline:auto}
+.masthead{border-bottom:1px solid var(--ink);padding:13px 0 10px}
+.masthead-row{display:flex;align-items:center;justify-content:space-between;gap:18px}
+.wordmark{font-size:11px;font-weight:600;letter-spacing:.12em;text-transform:uppercase}
+.wordmark span{color:var(--red)}
+.nav{display:flex;gap:18px;flex-wrap:wrap;font-size:10px;text-transform:uppercase;letter-spacing:.06em}
+.nav a{text-decoration:none;color:var(--stone)}
+.nav a:hover{color:var(--red)}
+.buildline{display:flex;align-items:center;justify-content:space-between;gap:12px;border-bottom:1px solid var(--line);padding:8px 0;font-size:10px;color:var(--stone);text-transform:uppercase;letter-spacing:.055em}
+.buildline strong{color:var(--ink);font-weight:500}
+.state-dot{display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--red);margin-right:7px;vertical-align:1px}
+h1,h2,h3,p{margin-top:0}
+h1,h2,.serif{font-family:var(--serif);font-weight:500;letter-spacing:-.035em}
+h1{font-size:clamp(34px,5vw,64px);line-height:.98;margin:0}
+h2{font-size:clamp(25px,3vw,38px);line-height:1.05;margin-bottom:12px}
+h3{font-size:13px;font-weight:600;letter-spacing:-.02em;margin:0 0 10px}
+.kicker,.eyebrow{font-size:10px;text-transform:uppercase;letter-spacing:.1em;color:var(--stone)}
+.intro{padding:22px 0 18px;display:flex;align-items:end;justify-content:space-between;gap:24px}
+.intro-copy{max-width:710px}
+.intro-copy p{max-width:660px;color:var(--stone);margin:12px 0 0;font-size:12px}
+.intro-meta{text-align:right;min-width:190px;font-size:10px;color:var(--stone)}
+.intro-meta b{display:block;color:var(--ink);font-weight:500;font-size:12px}
+.panel{border:1px solid var(--ink);background:rgba(255,255,255,.17)}
+.panel-head{padding:9px 12px;border-bottom:1px solid var(--ink);display:flex;justify-content:space-between;gap:12px;align-items:center}
+.panel-head .eyebrow{color:var(--ink)}
+.panel-head small{font-size:9px;color:var(--stone)}
+.demo-grid{display:grid;grid-template-columns:minmax(270px,.84fr) minmax(0,1.16fr)}
+.demo-input{padding:14px;border-right:1px solid var(--ink)}
+.demo-output{padding:14px;min-width:0}
+.demo-topline{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;gap:10px}
+.demo-topline strong{font-size:11px;font-weight:600}
+.status{font-size:9px;text-transform:uppercase;letter-spacing:.08em;color:var(--green)}
+.field{display:block;margin-bottom:10px}
+.field>span{display:block;font-size:9px;text-transform:uppercase;letter-spacing:.08em;color:var(--stone);margin-bottom:4px}
+.field input,.field textarea{display:block;width:100%;border:1px solid var(--line);background:var(--paper);color:var(--ink);padding:8px 9px;border-radius:0;font-size:11px}
+.field textarea{min-height:54px;resize:vertical}
+.field input:focus,.field textarea:focus{border-color:var(--red);outline:1px solid var(--red)}
+.field-row{display:grid;grid-template-columns:1fr 1fr;gap:9px}
+.controls{display:flex;gap:7px;flex-wrap:wrap;margin-top:12px}
+.btn{border:1px solid var(--ink);background:var(--ink);color:var(--paper);padding:8px 11px;font-size:10px;text-transform:uppercase;letter-spacing:.06em}
+.btn:hover{background:var(--red);border-color:var(--red);color:white}
+.btn.secondary{background:transparent;color:var(--ink)}
+.btn.secondary:hover{background:var(--soft);border-color:var(--red);color:var(--ink)}
+.btn:disabled{opacity:.4;cursor:not-allowed}
+.sim-note{font-size:9px;color:var(--stone);margin:11px 0 0}
+.switchline{display:flex;align-items:center;gap:8px;font-size:10px;margin-top:10px;color:var(--stone)}
+.switchline input{accent-color:var(--red)}
+.pipeline{display:grid;grid-template-columns:repeat(4,1fr);border-bottom:1px solid var(--line);margin:-1px -1px 12px}
+.pipe-step{padding:8px 9px;border-right:1px solid var(--line);font-size:9px;color:var(--stone);min-width:0}
+.pipe-step:last-child{border-right:0}
+.pipe-step b{display:block;color:var(--ink);font-size:10px;font-weight:500}
+.pipe-step em{font-style:normal;display:block;margin-top:3px;font-size:8px;text-transform:uppercase;letter-spacing:.08em}
+.pipe-step.done em{color:var(--green)}
+.pipe-step.active{background:var(--soft)}
+.output-tabs{display:flex;gap:0;border-bottom:1px solid var(--line);margin-bottom:10px}
+.output-tabs button{background:none;border:0;border-bottom:2px solid transparent;padding:6px 10px 7px 0;margin-right:15px;color:var(--stone);font-size:9px;text-transform:uppercase;letter-spacing:.06em}
+.output-tabs button[aria-selected=true]{border-bottom-color:var(--red);color:var(--ink)}
+.output-pane{display:none}
+.output-pane.active{display:block}
+.preview{min-height:230px;max-height:360px;overflow:auto;white-space:pre-wrap;overflow-wrap:anywhere;font-size:10px;line-height:1.65;background:#eeebe3;border:1px solid var(--line);padding:11px}
+.preview .placeholder{color:#898477}
+.data-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.data-box{border:1px solid var(--line);padding:9px;min-width:0}
+.data-box small{display:block;color:var(--stone);font-size:8px;text-transform:uppercase;letter-spacing:.08em}
+.data-box strong{display:block;font-size:16px;font-weight:500;margin-top:3px;overflow-wrap:anywhere}
+.event-log{font-size:9px;color:var(--stone);margin-top:10px;max-height:86px;overflow:auto}
+.event-log div{padding:3px 0;border-bottom:1px dotted var(--line)}
+.event-log .ok{color:var(--green)}.event-log .bad{color:var(--red)}
+.section{padding:38px 0 0;scroll-margin-top:18px}
+.section-head{display:flex;justify-content:space-between;align-items:end;gap:20px;border-bottom:1px solid var(--ink);padding-bottom:10px;margin-bottom:14px}
+.section-head p{margin:0;color:var(--stone);font-size:10px;max-width:430px;text-align:right}
+.arch-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.arch-box{border:1px solid var(--line);padding:13px;min-width:0}
+.tree{font-size:10px;line-height:1.85;white-space:pre;overflow:auto}
+.tree .dir{color:var(--red);font-weight:600}
+.tree .muted{color:var(--stone)}
+.dataflow{display:grid;grid-template-columns:repeat(4,1fr);gap:0;border:1px solid var(--line);margin-top:14px}
+.flow{padding:12px;border-right:1px solid var(--line);min-width:0}
+.flow:last-child{border:0}
+.flow .n{font-size:9px;color:var(--red)}
+.flow b{display:block;font-size:10px;margin:5px 0}
+.flow p{font-size:9px;color:var(--stone);margin:0}
+.table-wrap{overflow-x:auto;border:1px solid var(--line)}
+table{width:100%;border-collapse:collapse;text-align:left;font-size:10px}
+th,td{padding:9px 10px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-size:9px;text-transform:uppercase;letter-spacing:.07em;color:var(--stone);font-weight:500;background:var(--soft)}
+tr:last-child td{border-bottom:0}
+td code,code{font-family:var(--mono);font-size:.95em;background:var(--soft);padding:1px 3px}
+.constraints{display:grid;grid-template-columns:1fr 1fr;gap:0;border:1px solid var(--line)}
+.constraint{padding:12px;border-bottom:1px solid var(--line)}
+.constraint:nth-child(odd){border-right:1px solid var(--line)}
+.constraint:nth-last-child(-n+2){border-bottom:0}
+.constraint b{font-size:10px;display:block;margin-bottom:4px}
+.constraint p{font-size:9px;color:var(--stone);margin:0}
+.release-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.release-box{border:1px solid var(--line);padding:13px;min-width:0}
+.release-value{font-size:18px;font-family:var(--serif);margin:6px 0}
+.release-detail{font-size:9px;color:var(--stone);overflow-wrap:anywhere}
+.release-assets{display:grid;gap:5px;margin-top:10px}
+.release-assets a{font-size:10px;display:flex;justify-content:space-between;gap:10px;border-top:1px dotted var(--line);padding-top:5px}
+.api-status{font-size:9px;color:var(--stone);margin-top:9px}
+.api-status.error{color:var(--red)}
+.command{border:1px solid var(--line);background:#eeebe3;padding:10px 12px;margin:8px 0 13px;overflow:auto}
+.command code{background:none;padding:0;font-size:10px;white-space:pre}
+.copy{float:right;border:1px solid var(--line);background:transparent;padding:4px 7px;font-size:8px;text-transform:uppercase}
+.note{border-left:2px solid var(--red);padding:7px 10px;color:var(--stone);font-size:10px;background:rgba(217,56,30,.035)}
+.footer{border-top:1px solid var(--ink);margin-top:40px;padding:14px 0 24px;display:flex;justify-content:space-between;gap:20px;color:var(--stone);font-size:9px}
+.is-embedded .masthead,.is-embedded .footer,.is-embedded .nav{display:none}
+.is-embedded .shell{width:min(var(--measure),calc(100% - 24px))}
+@media(max-width:800px){.demo-grid,.arch-grid,.release-grid{grid-template-columns:1fr}.demo-input{border-right:0;border-bottom:1px solid var(--ink)}.intro{align-items:start;flex-direction:column}.intro-meta{text-align:left}.dataflow{grid-template-columns:1fr 1fr}.flow:nth-child(2){border-right:0}.flow:nth-child(-n+2){border-bottom:1px solid var(--line)}}
+@media(max-width:520px){.shell{width:calc(100% - 24px)}.nav{gap:10px}.buildline{align-items:flex-start;flex-direction:column}.pipeline{grid-template-columns:1fr 1fr}.pipe-step:nth-child(2){border-right:0}.pipe-step:nth-child(-n+2){border-bottom:1px solid var(--line)}.field-row,.constraints{grid-template-columns:1fr}.constraint:nth-child(odd){border-right:0}.constraint:nth-last-child(2){border-bottom:1px solid var(--line)}.dataflow{grid-template-columns:1fr}.flow{border-right:0;border-bottom:1px solid var(--line)}.flow:last-child{border-bottom:0}.section-head{align-items:start;flex-direction:column}.section-head p{text-align:left}.footer{flex-direction:column}}
+@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<header class="masthead">
+  <div class="shell masthead-row">
+    <div class="wordmark">MK / <span>Daily-Log</span></div>
+    <nav class="nav" aria-label="Manual sections">
+      <a href="#manual">Manual</a><a href="#architecture">Architecture</a><a href="#workflows">Workflows</a><a href="#constraints">Constraints</a><a href="#release">GitHub wire</a>
+    </nav>
+  </div>
+</header>
+<main class="shell">
+  <div class="buildline">
+    <span><i class="state-dot"></i><strong>Build state</strong> · main · automation repository</span>
+    <span id="build-meta">HEAD bcf81dd · no published release</span>
+  </div>
+  <section class="intro" id="manual">
+    <div class="intro-copy">
+      <div class="kicker">Engineering journal / system manual 01</div>
+      <h1>Daily-Log<span style="color:var(--red)">.</span></h1>
+      <p>A Markdown-first engineering journal. GitHub Actions creates a dated entry, collects repository activity, accepts issue-form notes, and rebuilds a compact portfolio index. The archive—not a database—is the record.</p>
+    </div>
+    <div class="intro-meta">
+      <span class="eyebrow">Runtime / current main</span>
+      <b>Node.js 22 · GitHub Actions</b>
+      <span>Public repository · no package dependencies</span>
+    </div>
+  </section>
+
+  <section class="panel" aria-labelledby="demo-title">
+    <div class="panel-head">
+      <span class="eyebrow" id="demo-title">01 / Interactive pipeline simulation</span>
+      <small>Local state only · no GitHub writes</small>
+    </div>
+    <div class="demo-grid">
+      <div class="demo-input">
+        <div class="demo-topline"><strong>Issue form input</strong><span class="status">Simulated issue close</span></div>
+        <label class="field"><span>Simulation date (UTC)</span><input id="log-date" type="date"></label>
+        <label class="field"><span>Shipped</span><textarea id="shipped" placeholder="- Shipped a feature"></textarea></label>
+        <label class="field"><span>Learned</span><textarea id="learned" placeholder="- Learned a useful lesson"></textarea></label>
+        <div class="field-row">
+          <label class="field"><span>Blockers</span><textarea id="blockers" placeholder="- None"></textarea></label>
+          <label class="field"><span>Tomorrow</span><textarea id="tomorrow" placeholder="- Next move"></textarea></label>
+        </div>
+        <label class="switchline"><input id="api-failure" type="checkbox"> Simulate all activity API requests failing</label>
+        <div class="controls">
+          <button class="btn" id="run-all">Run pipeline ↗</button>
+          <button class="btn secondary" id="step-next">Next step</button>
+          <button class="btn secondary" id="reset">Reset</button>
+        </div>
+        <p class="sim-note">The simulation follows the repository's template headings, issue field labels, archive path and activity markers. It does not call GitHub's write API.</p>
+      </div>
+      <div class="demo-output">
+        <div class="pipeline" aria-label="Pipeline progress">
+          <div class="pipe-step active" data-step="0"><b>01 · Create</b><em>Waiting</em></div>
+          <div class="pipe-step" data-step="1"><b>02 · Capture</b><em>Waiting</em></div>
+          <div class="pipe-step" data-step="2"><b>03 · Activity</b><em>Waiting</em></div>
+          <div class="pipe-step" data-step="3"><b>04 · Index</b><em>Waiting</em></div>
+        </div>
+        <div class="demo-topline"><strong id="output-title">Generated daily entry</strong><span class="eyebrow" id="output-path">logs/YYYY/MM/YYYY-MM-DD.md</span></div>
+        <div class="output-tabs" role="tablist" aria-label="Simulation output">
+          <button role="tab" aria-selected="true" data-tab="markdown">Markdown</button>
+          <button role="tab" aria-selected="false" data-tab="json">latest.json</button>
+          <button role="tab" aria-selected="false" data-tab="events">Event trace</button>
+        </div>
+        <div class="output-pane active" id="pane-markdown"><pre class="preview" id="markdown-preview"><span class="placeholder">Run the pipeline to create a dated Markdown entry.</span></pre></div>
+        <div class="output-pane" id="pane-json"><pre class="preview" id="json-preview"><span class="placeholder">The dashboard step generates the schema_version 1 payload.</span></pre></div>
+        <div class="output-pane" id="pane-events"><div class="preview event-log" id="trace-preview">No events yet.</div></div>
+        <div class="controls"><button class="btn secondary" id="copy-output">Copy Markdown</button><button class="btn secondary" id="download-output">Download .md</button></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" id="architecture">
+    <div class="section-head">
+      <div><div class="eyebrow">02 / Source map</div><h2>What runs where.</h2></div>
+      <p>Directory and module names below are read from the current repository tree. This is the implemented system, not a proposed architecture.</p>
+    </div>
+    <div class="arch-grid">
+      <div class="arch-box">
+        <h3>Repository map / main</h3>
+        <div class="tree"><span class="dir">.github/</span>
+├── <span class="dir">ISSUE_TEMPLATE/</span>
+│   └── daily-log.yml
+└── <span class="dir">workflows/</span>
+    ├── daily.yml
+    ├── issue-log.yml
+    ├── weekly.yml
+    └── validate.yml
+
+<span class="dir">scripts/</span>
+├── lib/
+│   ├── github.mjs
+│   └── markdown.mjs
+├── test/
+│   └── markdown.test.mjs
+├── collect-activity.mjs
+├── create-daily-log.mjs
+├── generate-dashboard.mjs
+├── issue-to-log.mjs
+├── migrate-legacy-logs.mjs
+└── weekly-summary.mjs
+
+<span class="dir">logs/YYYY/MM/</span>       daily archive
+<span class="dir">weekly/YYYY-WXX.md</span>  weekly rollups
+template.md             entry template
+latest.json             portfolio payload
+README.md               generated dashboard</div>
+      </div>
+      <div class="arch-box">
+        <h3>Runtime responsibilities</h3>
+        <table>
+          <tbody>
+            <tr><td><code>github.mjs</code></td><td>Authenticated GitHub REST wrapper; Contents API reads/writes; recursive Git tree; issue retrieval. Uses <code>GH_ACTIVITY_TOKEN</code> for external activity reads when set.</td></tr>
+            <tr><td><code>markdown.mjs</code></td><td>Replaces a Markdown heading section and removes duplicate headings before writing issue answers.</td></tr>
+            <tr><td><code>create-daily-log.mjs</code></td><td>Uses UTC date, checks target path, counts archived entries, fills <code>template.md</code>.</td></tr>
+            <tr><td><code>collect-activity.mjs</code></td><td>Queries commits, merged PRs and releases for the last 24 hours; preserves old activity block if all repos fail.</td></tr>
+            <tr><td><code>generate-dashboard.mjs</code></td><td>Reads latest 10 entries; calculates total and streak; rewrites README dashboard and schema v1 <code>latest.json</code>.</td></tr>
+            <tr><td><code>migrate-legacy-logs.mjs</code></td><td>Copies root-level YYYY-MM-DD Markdown files into the archive, then deletes the source only after the destination write succeeds; conflicts are left untouched.</td></tr>
+            <tr><td><code>weekly-summary.mjs</code></td><td>Finds current Monday–Sunday UTC window and assembles its daily entries into an ISO-week file.</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <div class="arch-box" style="margin-top:14px">
+      <h3>latest.json / schema_version 1</h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Field</th><th>Type</th><th>Source / meaning</th></tr></thead>
+          <tbody>
+            <tr><td><code>generated_at</code></td><td>ISO timestamp</td><td>Time the dashboard generator ran.</td></tr>
+            <tr><td><code>total_logs</code></td><td>Integer</td><td>Count of distinct dates found under the dated archive path.</td></tr>
+            <tr><td><code>current_streak</code></td><td>Integer</td><td>Consecutive UTC dates, starting today or yesterday, found in the archive.</td></tr>
+            <tr><td><code>latest_entry</code></td><td>Object or null</td><td>Newest dated entry. Null when no archive entries exist.</td></tr>
+            <tr><td><code>latest_entry.date</code>, <code>path</code>, <code>url</code></td><td>Strings</td><td>Archive date, repository-relative Markdown path and canonical GitHub blob URL.</td></tr>
+            <tr><td><code>latest_entry.highlight</code></td><td>String</td><td>First non-empty item under Shipped / What I Built / Highlight, limited to 180 characters; otherwise a default label.</td></tr>
+            <tr><td><code>latest_entry.tags</code></td><td>String array</td><td>Up to four hashtag tokens extracted from the Markdown.</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <div class="dataflow" aria-label="Daily log data flow">
+      <div class="flow"><span class="n">INPUT / 01</span><b>Schedule or issue</b><p>UTC cron creates an entry; a closed <code>Daily log:</code> issue submits the four text fields.</p></div>
+      <div class="flow"><span class="n">TRANSFORM / 02</span><b>Markdown + GitHub API</b><p>Template substitution or section replacement writes to <code>logs/YYYY/MM/</code>.</p></div>
+      <div class="flow"><span class="n">ENRICH / 03</span><b>Activity + rollup</b><p>REST reads collect recent commits, merged PRs and releases; weekly job concatenates daily files.</p></div>
+      <div class="flow"><span class="n">OUTPUT / 04</span><b>Portfolio index</b><p>README dashboard and <code>latest.json</code> expose the archive's current state.</p></div>
+    </div>
+  </section>
+
+  <section class="section" id="workflows">
+    <div class="section-head">
+      <div><div class="eyebrow">03 / Execution model</div><h2>Three paths through Actions.</h2></div>
+      <p>All dates are UTC. Scheduled workflows can also be run manually where <code>workflow_dispatch</code> is configured.</p>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Workflow</th><th>Trigger</th><th>Actual steps</th><th>Permissions</th></tr></thead>
+        <tbody>
+          <tr><td><b>Daily log automation</b><br><code>daily.yml</code></td><td>Every day, <code>00:05 UTC</code><br>Manual dispatch</td><td>Checkout → Node 22 → migrate legacy root logs → create today's entry → collect activity → rebuild dashboard.</td><td><code>contents: write</code><br><code>issues: read</code></td></tr>
+          <tr><td><b>Save daily log issue</b><br><code>issue-log.yml</code></td><td>Issue closed; title begins <code>Daily log:</code></td><td>Checkout → Node 22 → parse issue body and update dated entry → rebuild dashboard.</td><td><code>contents: write</code><br><code>issues: read</code></td></tr>
+          <tr><td><b>Weekly engineering review</b><br><code>weekly.yml</code></td><td>Sunday, <code>23:55 UTC</code><br>Manual dispatch</td><td>Checkout → Node 22 → gather entries from the current Monday–Sunday UTC window → write <code>weekly/YYYY-WXX.md</code>.</td><td><code>contents: write</code></td></tr>
+          <tr><td><b>Validate automation scripts</b><br><code>validate.yml</code></td><td>Relevant PRs; pushes to <code>main</code></td><td>Node 22 syntax checks for <code>scripts/**/*.mjs</code> → Node built-in test runner for <code>scripts/test/*.test.mjs</code>.</td><td><code>contents: read</code></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <h3 style="margin-top:17px">Configuration / repository Actions settings</h3>
+    <div class="arch-grid">
+      <div class="arch-box">
+        <h3>Required by scripts</h3>
+        <p style="font-size:10px;color:var(--stone)">The shared GitHub client throws at startup unless both variables are present.</p>
+        <div class="command"><code>GITHUB_TOKEN=...<br>GITHUB_REPOSITORY=owner/repository</code></div>
+        <p style="font-size:9px;color:var(--stone)">Workflows provide these from <code>secrets.GITHUB_TOKEN</code> and <code>github.repository</code>. They are not committed to the repository.</p>
+      </div>
+      <div class="arch-box">
+        <h3>Optional cross-repository activity</h3>
+        <div class="command"><code>GH_ACTIVITY_REPOS=owner/repo-a,owner/repo-b<br>GH_ACTIVITY_TOKEN=read-only-token</code></div>
+        <p style="font-size:9px;color:var(--stone)">Set <code>GH_ACTIVITY_REPOS</code> as an Actions variable and <code>GH_ACTIVITY_TOKEN</code> as a secret. If absent, the activity reader falls back to <code>GITHUB_TOKEN</code>. Writes always use <code>GITHUB_TOKEN</code>.</p>
+      </div>
+    </div>
+    <section class="arch-box" style="margin-top:14px">
+      <h3>Local invocation / Node.js 22</h3>
+      <p style="font-size:9px;color:var(--stone)">These are the scripts called by the workflows. They use GitHub's API to read and commit repository files; they are not local-file-only commands.</p>
+      <div class="command"><code>export GITHUB_TOKEN="ghp_…"
+export GITHUB_REPOSITORY="owner/repository"
+
+node scripts/migrate-legacy-logs.mjs
+node scripts/create-daily-log.mjs
+node scripts/collect-activity.mjs
+node scripts/generate-dashboard.mjs
+
+ISSUE_NUMBER=123 node scripts/issue-to-log.mjs
+node scripts/weekly-summary.mjs
+node --test scripts/test/*.test.mjs</code></div>
+      <p style="font-size:9px;color:var(--stone)">Use a token with repository contents write access (and issues read access for issue capture). Configure <code>GH_ACTIVITY_REPOS</code> and optional <code>GH_ACTIVITY_TOKEN</code> for external activity reads. The workflows inject the required variables automatically.</p>
+    </section>
+    <div class="note" style="margin-top:12px">There is no package.json, dependency install, local CLI wrapper, database, server process, or separate backend in the current tree. The scripts are Node.js ES modules that use built-in fetch, Buffer and the Node test runner.</div>
+  </section>
+
+  <section class="section" id="constraints">
+    <div class="section-head">
+      <div><div class="eyebrow">04 / Engineering constraints</div><h2>What it does—and does not.</h2></div>
+      <p>Constraints visible in source, workflow definitions and repository contents as inspected for this build.</p>
+    </div>
+    <div class="constraints">
+      <div class="constraint"><b>GitHub is the storage layer</b><p>Daily and weekly files, README and JSON are committed through the GitHub Contents API. There is no database or local persistent store.</p></div>
+      <div class="constraint"><b>UTC defines the calendar</b><p>Daily paths, issue fallback dates, activity windows, streaks and weekly periods are calculated in UTC.</p></div>
+      <div class="constraint"><b>Activity is a 24-hour snapshot</b><p>Commits, merged PRs and releases are read from up to 100 returned items per endpoint. It is not a complete analytics/event stream.</p></div>
+      <div class="constraint"><b>Public release state is empty</b><p>No GitHub release or binary asset is published at the time this manual was built. A version download cannot be offered yet.</p></div>
+      <div class="constraint"><b>Validation is deliberately small</b><p>The current suite has eight Node built-in tests: five Markdown section tests and three manual-document tests (including inline JavaScript parsing). It does not run integration tests against GitHub APIs.</p></div>
+      <div class="constraint"><b>GitHub Actions is the execution host</b><p>Workflows use Ubuntu runners and Node.js 22. No Windows, Android, macOS, or self-hosted runtime is defined.</p></div>
+      <div class="constraint"><b>Issue form is a GitHub interface</b><p>Capture uses the GitHub Issue Forms schema. The workflow runs when a matching issue is closed—not on draft or every edit.</p></div>
+      <div class="constraint"><b>Dashboard writes are sequential API calls</b><p>README and latest.json are separate Contents API writes. The repository does not implement a transaction spanning both files.</p></div>
+    </div>
+  </section>
+
+  <section class="section" id="release">
+    <div class="section-head">
+      <div><div class="eyebrow">05 / Live GitHub wire</div><h2>Repository, release, commit.</h2></div>
+      <p>Owner and repository are detected from the GitHub Pages hostname and project path (or github.com path). Public REST API only; no token is embedded here.</p>
+    </div>
+    <div class="release-grid">
+      <div class="release-box">
+        <div class="eyebrow">Repository</div>
+        <div class="release-value" id="repo-name">Detecting repository…</div>
+        <div class="release-detail" id="repo-detail">Waiting for GitHub REST API.</div>
+        <div class="release-detail" id="repo-stats"></div>
+      </div>
+      <div class="release-box">
+        <div class="eyebrow">Latest published release</div>
+        <div class="release-value" id="release-tag">Checking releases…</div>
+        <div class="release-detail" id="release-detail">The /releases/latest endpoint is queried at page load.</div>
+        <div class="release-assets" id="release-assets"></div>
+      </div>
+      <div class="release-box">
+        <div class="eyebrow">Latest commit</div>
+        <div class="release-value" id="commit-date">Checking commit…</div>
+        <div class="release-detail" id="commit-detail"></div>
+      </div>
+      <div class="release-box">
+        <div class="eyebrow">API status</div>
+        <div class="release-value" id="api-limit">—</div>
+        <div class="release-detail" id="api-detail">Unauthenticated GitHub REST requests are subject to public API rate limits.</div>
+        <button class="btn secondary" id="refresh-api" style="margin-top:10px">Refresh data ↻</button>
+      </div>
+    </div>
+    <p class="api-status" id="api-status" aria-live="polite">Detecting repository from window.location…</p>
+  </section>
+</main>
+<footer class="shell footer">
+  <span>DAILY-LOG / SOURCE-ALIGNED MANUAL</span>
+  <span>Single HTML file · Vanilla JS · No runtime dependencies</span>
+</footer>
+<script>
+(function(){
+  "use strict";
+  try { if (window.self !== window.top) document.body.classList.add("is-embedded"); } catch (_) { document.body.classList.add("is-embedded"); }
+
+  const $ = (id) => document.getElementById(id);
+  const state = {step:-1, markdown:"", json:null, path:"", events:[], generated:false, activityFailed:false};
+  const template = "# Daily Log — {{DATE}}\n\n**Day:** {{DAY_NUMBER}}  \n**Status:** 🟢 Online\n\n## Shipped\n- \n\n## Learned\n- \n\n## Blockers\n- \n\n## Tomorrow\n- \n\n{{GITHUB_ACTIVITY}}\n\n---\n";
+  const headings=["Shipped","Learned","Blockers","Tomorrow"];
+  const escapeRegExp = (s) => s.replace(/[.*+?^{}()|[\]\\]/g,"\\$&").replaceAll("$","\\$");
+
+  function replaceSection(markdown,heading,value){
+    const escaped=escapeRegExp(heading);
+    const pattern=new RegExp("^(#{1,6})[ \\t]+"+escaped+"[ \\t]*\\r?$","gm");
+    const matches=Array.from(markdown.matchAll(pattern));
+    for(const duplicate of matches.slice(1).reverse()){
+      const level=duplicate[1].length;
+      let start=duplicate.index+duplicate[0].length;
+      if(markdown.slice(start,start+2)==="\r\n")start+=2;
+      else if(markdown[start]==="\n")start++;
+      const boundary=new RegExp("^#{1,"+level+"}[ \\t]+|^---[ \\t]*$|^<!-- ACTIVITY:START -->$|^<!-- ACTIVITY:END -->$","gm");
+      boundary.lastIndex=start;
+      const hit=boundary.exec(markdown);
+      const end=hit?hit.index:markdown.length;
+      const before=markdown.slice(0,duplicate.index).replace(/\n+$/,"");
+      const after=markdown.slice(end).replace(/^\n+/,"");
+      markdown=before+(before?"\n\n":"")+after;
+    }
+    const match=pattern.exec(markdown);
+    if(!match)return markdown.trimEnd()+"\n\n## "+heading+"\n"+value.trim()+"\n";
+    let start=match.index+match[0].length;
+    if(markdown.slice(start,start+2)==="\r\n")start+=2;
+    else if(markdown[start]==="\n")start++;
+    const boundary=new RegExp("^#{1,"+match[1].length+"}[ \\t]+|^---[ \\t]*$|^<!-- ACTIVITY:START -->$|^<!-- ACTIVITY:END -->$","gm");
+    boundary.lastIndex=start;
+    const hit=boundary.exec(markdown);
+    const end=hit?hit.index:markdown.length;
+    return markdown.slice(0,start)+value.trim()+"\n\n"+markdown.slice(end).replace(/^\n+/,"");
+  }
+  function addEvent(message,kind){
+    state.events.push({message,kind:kind||"ok",time:new Date().toISOString().slice(11,19)+"Z"});
+    $("trace-preview").innerHTML=state.events.map(e=>'<div class="'+e.kind+'"><span>'+e.time+'</span> &nbsp; '+escapeHTML(e.message)+'</div>').join("");
+  }
+  function escapeHTML(s){return String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));}
+  function renderSteps(){
+    document.querySelectorAll(".pipe-step").forEach((el,i)=>{
+      el.classList.toggle("done",i<state.step);
+      el.classList.toggle("active",i===state.step);
+      el.querySelector("em").textContent=i<state.step?"Complete":i===state.step?"Current":"Waiting";
+    });
+  }
+  function render(){
+    $("markdown-preview").textContent=state.markdown||"Run the pipeline to create a dated Markdown entry.";
+    $("json-preview").textContent=state.json?JSON.stringify(state.json,null,2):"The dashboard step generates the schema_version 1 payload.";
+    $("output-path").textContent=state.path||"logs/YYYY/MM/YYYY-MM-DD.md";
+    $("output-title").textContent=state.generated?"Generated daily entry":"Generated daily entry";
+    $("copy-output").disabled=!state.markdown;
+    $("download-output").disabled=!state.markdown;
+    renderSteps();
+  }
+  function currentInput(){
+    return {
+      date:$("log-date").value,
+      Shipped:$("shipped").value.trim(),
+      Learned:$("learned").value.trim(),
+      Blockers:$("blockers").value.trim(),
+      Tomorrow:$("tomorrow").value.trim()
+    };
+  }
+  function createEntry(){
+    const input=currentInput();
+    if(!input.date||!/^\d{4}-\d{2}-\d{2}$/.test(input.date))throw new Error("Enter a valid UTC date.");
+    if(input.date<="2026-11-11")throw new Error("The inspected archive already contains 2026-11-11. Choose a later date for this new-entry simulation.");
+    const parsed=new Date(input.date+"T00:00:00Z");
+    if(Number.isNaN(parsed.valueOf())||parsed.toISOString().slice(0,10)!==input.date)throw new Error("Date is not a real calendar day.");
+    const [year,month]=input.date.split("-");
+    state.path="logs/"+year+"/"+month+"/"+input.date+".md";
+    const dayNumber=2; // One archived daily entry is present in the inspected repository.
+    state.markdown=template.replaceAll("{{DATE}}",input.date).replaceAll("{{DAY_NUMBER}}",String(dayNumber)).replaceAll("{{GITHUB_ACTIVITY}}","_Activity will be collected automatically._");
+    state.step=1;state.generated=true;
+    addEvent("Created "+state.path+" from template.md (simulated).");
+    render();
+  }
+  function captureIssue(){
+    if(state.step<1)throw new Error("Create the daily entry first.");
+    const input=currentInput();
+    if(!input.Shipped)throw new Error("Shipped is required by the repository issue form.");
+    const issueBody="### Log date (UTC)\n\n"+input.date+"\n\n"+headings.map(heading=>"### "+heading+"\n\n"+(input[heading]||"_No response_")).join("\n\n");
+    for(const heading of headings){
+      const fieldPattern=new RegExp("^### "+escapeRegExp(heading)+"\\s*\\r?\\n+([\\s\\S]*?)(?=^### |$(?![\\s\\S]))","m");
+      const value=(issueBody.match(fieldPattern)?.[1]||"").trim();
+      state.markdown=replaceSection(state.markdown,heading,value&&value!=="_No response_"?value:"_Not provided._");
+    }
+    addEvent("Closed Daily log: issue; parsed UTC date and four GitHub Issue Form fields.");
+    state.step=2;render();
+  }
+  function collectActivity(){
+    if(state.step<2)throw new Error("Capture issue answers before activity collection.");
+    if($("api-failure").checked){
+      state.activityFailed=true;
+      state.step=2;render();
+      throw new Error("Activity collection failed for every configured repository. The daily entry remains unchanged; no false empty-activity result is written.");
+    }
+    const marker=/<!-- ACTIVITY:START -->[\s\S]*?<!-- ACTIVITY:END -->/;
+    const block="<!-- ACTIVITY:START -->\n## Shipped Today (GitHub activity)\n_Simulation: no commits, merged pull requests, or releases in the last 24 hours._\n<!-- ACTIVITY:END -->";
+    if(marker.test(state.markdown))state.markdown=state.markdown.replace(marker,block);
+    else state.markdown=state.markdown.trimEnd()+"\n\n"+block+"\n";
+    state.activityFailed=false;state.step=3;
+    addEvent("Activity block replaced. Demo uses an empty successful response; no live activity is written.");
+    render();
+  }
+  function rebuildDashboard(){
+    if(state.step<3)throw new Error("Collect activity before rebuilding the dashboard.");
+    const date=currentInput().date;
+    state.json={
+      schema_version:1,
+      generated_at:new Date().toISOString(),
+      total_logs:2,
+      current_streak:1,
+      latest_entry:{
+        date:date,
+        path:state.path,
+        highlight:(currentInput().Shipped.split(/\r?\n/).map(line=>line.replace(/^\s*[-*]\s*/,"").trim()).find(Boolean)||"Daily engineering log").replace(/^_+|_+$/g,"").slice(0,180),
+        tags:[...state.markdown.matchAll(/(?:^|\s)#([a-zA-Z0-9_-]+)/g)].map(match=>match[1]).slice(0,4),
+        url:"https://github.com/"+(repo||"michaelkage/Daily-Log")+"/blob/main/"+state.path
+      }
+    };
+    state.step=4;
+    addEvent("Generated latest.json schema_version 1 and refreshed dashboard metrics (simulated).");
+    render();
+  }
+  function runStep(){
+    try{
+      if(state.step<0)createEntry();
+      else if(state.step===1)captureIssue();
+      else if(state.step===2)collectActivity();
+      else if(state.step===3)rebuildDashboard();
+      else addEvent("Pipeline already complete. Reset to run again.");
+    }catch(error){addEvent(error.message,"bad");}
+  }
+  function reset(){
+    state.step=-1;state.markdown="";state.json=null;state.path="";state.events=[];state.generated=false;state.activityFailed=false;
+    $("trace-preview").textContent="No events yet.";
+    render();
+  }
+  $("log-date").value="2026-11-12";
+  $("run-all").addEventListener("click",()=>{
+    reset();
+    for(let i=0;i<4;i++){
+      const before=state.step;
+      runStep();
+      if(state.step===before||state.activityFailed)break;
+    }
+  });
+  $("step-next").addEventListener("click",runStep);
+  $("reset").addEventListener("click",reset);
+  $("copy-output").addEventListener("click",async()=>{
+    if(!state.markdown)return;
+    try{await navigator.clipboard.writeText(state.markdown);addEvent("Markdown copied to clipboard.");}
+    catch(_){addEvent("Clipboard access unavailable in this context.","bad");}
+  });
+  $("download-output").addEventListener("click",()=>{
+    if(!state.markdown)return;
+    const blob=new Blob([state.markdown],{type:"text/markdown;charset=utf-8"});
+    const url=URL.createObjectURL(blob);const a=document.createElement("a");
+    a.href=url;a.download=(state.path.split("/").pop()||"daily-log.md");a.click();URL.revokeObjectURL(url);
+  });
+  document.querySelectorAll("[data-tab]").forEach(button=>button.addEventListener("click",()=>{
+    document.querySelectorAll("[data-tab]").forEach(b=>b.setAttribute("aria-selected",String(b===button)));
+    document.querySelectorAll(".output-pane").forEach(p=>p.classList.remove("active"));
+    $("pane-"+button.dataset.tab).classList.add("active");
+  }));
+  render();
+
+  function detectRepository(){
+    const host=window.location.hostname.toLowerCase();
+    const parts=window.location.pathname.split("/").filter(Boolean).map(decodeURIComponent);
+    const query=new URLSearchParams(window.location.search).get("repo");
+    if(query&&/^[A-Za-z0-9_.-]+\/[A-Za-z0-9_.-]+$/.test(query))return query;
+    if(host.endsWith(".github.io")){
+      const owner=host.slice(0,-".github.io".length);
+      const name=parts[0]||owner+".github.io";
+      return owner+"/"+name;
+    }
+    if(host==="github.com"&&parts.length>=2)return parts[0]+"/"+parts[1].replace(/\.git$/,"");
+    return null;
+  }
+  const repo=detectRepository();
+  const apiBase=repo?"https://api.github.com/repos/"+repo.split("/").map(encodeURIComponent).join("/"):"";
+  const status=(message,isError)=>{
+    $("api-status").textContent=message;
+    $("api-status").classList.toggle("error",!!isError);
+  };
+  const formatDate=(value)=>{
+    if(!value)return"—";
+    const d=new Date(value);
+    if(Number.isNaN(d.valueOf()))return"—";
+    return new Intl.DateTimeFormat(undefined,{dateStyle:"medium",timeStyle:"short",timeZone:"UTC"}).format(d)+" UTC";
+  };
+  const bytes=(n)=>{
+    if(!Number.isFinite(n))return"";
+    if(n<1024)return n+" B";
+    if(n<1048576)return(n/1024).toFixed(1)+" KB";
+    return(n/1048576).toFixed(1)+" MB";
+  };
+  async function getJSON(url){
+    const response=await fetch(url,{headers:{Accept:"application/vnd.github+json"},cache:"no-store"});
+    const remaining=response.headers.get("x-ratelimit-remaining");
+    const limit=response.headers.get("x-ratelimit-limit");
+    if(remaining!==null)$("api-limit").textContent=remaining+" / "+(limit||"60")+" requests";
+    if(!response.ok){
+      const error=new Error("GitHub API "+response.status+" for "+url);
+      error.status=response.status;throw error;
+    }
+    return response.json();
+  }
+  async function loadGitHub(){
+    if(!repo){
+      $("repo-name").textContent="Repository not detected";
+      $("repo-detail").textContent="Open on owner.github.io/repository/ or github.com/owner/repository. For local preview, add ?repo=owner/repository.";
+      $("release-tag").textContent="Unavailable";
+      $("release-detail").textContent="No repository context in window.location.";
+      $("commit-date").textContent="Unavailable";
+      status("GitHub API not called: could not infer owner/repository from this URL.",true);
+      return;
+    }
+    $("repo-name").textContent=repo;
+    status("Fetching /repos/"+repo+", /releases/latest and latest commit…");
+    const requests=await Promise.allSettled([
+      getJSON(apiBase),
+      getJSON(apiBase+"/releases/latest"),
+      getJSON(apiBase+"/commits?per_page=1")
+    ]);
+    const repository=requests[0];
+    if(repository.status==="fulfilled"){
+      const r=repository.value;
+      $("repo-detail").textContent=(r.description||"No repository description.")+" · default branch: "+r.default_branch+" · "+r.visibility;
+      $("repo-stats").textContent="Created "+formatDate(r.created_at)+" · Updated "+formatDate(r.updated_at)+" · Pushed "+formatDate(r.pushed_at);
+    }else{
+      $("repo-detail").textContent=repository.reason.message;
+      $("repo-detail").classList.add("api-status","error");
+    }
+    const release=requests[1];
+    if(release.status==="fulfilled"){
+      const r=release.value;
+      $("release-tag").textContent=r.tag_name||r.name||"Untitled release";
+      $("release-detail").textContent=(r.name||"Published release")+" · published "+formatDate(r.published_at)+" · "+(r.draft?"draft":r.prerelease?"pre-release":"latest");
+      const assets=$("release-assets");assets.replaceChildren();
+      (r.assets||[]).forEach(asset=>{
+        const a=document.createElement("a");a.href=asset.browser_download_url;a.target="_blank";a.rel="noopener noreferrer";
+        const name=document.createElement("span");name.textContent=asset.name;
+        const size=document.createElement("small");size.textContent=bytes(asset.size);
+        a.append(name,size);assets.append(a);
+      });
+      if(!(r.assets||[]).length)$("release-assets").textContent="No release assets attached.";
+      const link=document.createElement("a");link.href=r.html_url;link.target="_blank";link.rel="noopener noreferrer";link.textContent="Open release ↗";$("release-assets").append(link);
+    }else if(release.reason.status===404){
+      $("release-tag").textContent="No published release";
+      $("release-detail").textContent="GitHub /releases/latest returned 404. No version tag or binary download is currently published.";
+    }else{
+      $("release-tag").textContent="Release lookup failed";
+      $("release-detail").textContent=release.reason.message;
+    }
+    const commit=requests[2];
+    if(commit.status==="fulfilled"&&commit.value.length){
+      const c=commit.value[0];const date=c.commit.committer.date||c.commit.author.date;
+      $("commit-date").textContent=formatDate(date);
+      $("commit-detail").textContent=c.commit.message.split("\n")[0]+" · "+c.sha.slice(0,7);
+      const a=document.createElement("a");a.href=c.html_url;a.target="_blank";a.rel="noopener noreferrer";a.textContent="Inspect latest commit ↗";$("commit-detail").append(document.createTextNode(" · "),a);
+    }else{
+      $("commit-date").textContent="Unavailable";
+      $("commit-detail").textContent=commit.status==="rejected"?commit.reason.message:"No commit returned.";
+    }
+    const failures=requests.filter(x=>x.status==="rejected");
+    const releaseLabel=release.status==="fulfilled"?(release.value.tag_name||release.value.name||"release"):(release.reason.status===404?"no published release":"release status unknown");
+    const commitLabel=commit.status==="fulfilled"&&commit.value.length?commit.value[0].sha.slice(0,7):"commit unknown";
+    $("build-meta").textContent="HEAD "+commitLabel+" · "+releaseLabel;
+    status(failures.length?failures.length+" of 3 GitHub API requests failed. Details are shown above.":"GitHub repository, latest release and latest commit loaded successfully.",failures.length>0);
+  }
+  $("refresh-api").addEventListener("click",loadGitHub);
+  loadGitHub();
+})();
+</script>
+</body>
+</html>
