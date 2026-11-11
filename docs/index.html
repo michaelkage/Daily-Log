@@ -249,7 +249,25 @@ README.md               generated dashboard</div>
             <tr><td><code>create-daily-log.mjs</code></td><td>Uses UTC date, checks target path, counts archived entries, fills <code>template.md</code>.</td></tr>
             <tr><td><code>collect-activity.mjs</code></td><td>Queries commits, merged PRs and releases for the last 24 hours; preserves old activity block if all repos fail.</td></tr>
             <tr><td><code>generate-dashboard.mjs</code></td><td>Reads latest 10 entries; calculates total and streak; rewrites README dashboard and schema v1 <code>latest.json</code>.</td></tr>
+            <tr><td><code>migrate-legacy-logs.mjs</code></td><td>Copies root-level YYYY-MM-DD Markdown files into the archive, then deletes the source only after the destination write succeeds; conflicts are left untouched.</td></tr>
             <tr><td><code>weekly-summary.mjs</code></td><td>Finds current Monday–Sunday UTC window and assembles its daily entries into an ISO-week file.</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <div class="arch-box" style="margin-top:14px">
+      <h3>latest.json / schema_version 1</h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Field</th><th>Type</th><th>Source / meaning</th></tr></thead>
+          <tbody>
+            <tr><td><code>generated_at</code></td><td>ISO timestamp</td><td>Time the dashboard generator ran.</td></tr>
+            <tr><td><code>total_logs</code></td><td>Integer</td><td>Count of distinct dates found under the dated archive path.</td></tr>
+            <tr><td><code>current_streak</code></td><td>Integer</td><td>Consecutive UTC dates, starting today or yesterday, found in the archive.</td></tr>
+            <tr><td><code>latest_entry</code></td><td>Object or null</td><td>Newest dated entry. Null when no archive entries exist.</td></tr>
+            <tr><td><code>latest_entry.date</code>, <code>path</code>, <code>url</code></td><td>Strings</td><td>Archive date, repository-relative Markdown path and canonical GitHub blob URL.</td></tr>
+            <tr><td><code>latest_entry.highlight</code></td><td>String</td><td>First non-empty item under Shipped / What I Built / Highlight, limited to 180 characters; otherwise a default label.</td></tr>
+            <tr><td><code>latest_entry.tags</code></td><td>String array</td><td>Up to four hashtag tokens extracted from the Markdown.</td></tr>
           </tbody>
         </table>
       </div>
@@ -321,7 +339,7 @@ node --test scripts/test/*.test.mjs</code></div>
       <div class="constraint"><b>UTC defines the calendar</b><p>Daily paths, issue fallback dates, activity windows, streaks and weekly periods are calculated in UTC.</p></div>
       <div class="constraint"><b>Activity is a 24-hour snapshot</b><p>Commits, merged PRs and releases are read from up to 100 returned items per endpoint. It is not a complete analytics/event stream.</p></div>
       <div class="constraint"><b>Public release state is empty</b><p>No GitHub release or binary asset is published at the time this manual was built. A version download cannot be offered yet.</p></div>
-      <div class="constraint"><b>Validation is deliberately small</b><p>The current test suite contains five Node built-in tests for Markdown section replacement. It does not run integration tests against GitHub APIs.</p></div>
+      <div class="constraint"><b>Validation is deliberately small</b><p>The current suite has eight Node built-in tests: five Markdown section tests and three manual-document tests (including inline JavaScript parsing). It does not run integration tests against GitHub APIs.</p></div>
       <div class="constraint"><b>GitHub Actions is the execution host</b><p>Workflows use Ubuntu runners and Node.js 22. No Windows, Android, macOS, or self-hosted runtime is defined.</p></div>
       <div class="constraint"><b>Issue form is a GitHub interface</b><p>Capture uses the GitHub Issue Forms schema. The workflow runs when a matching issue is closed—not on draft or every edit.</p></div>
       <div class="constraint"><b>Dashboard writes are sequential API calls</b><p>README and latest.json are separate Contents API writes. The repository does not implement a transaction spanning both files.</p></div>
