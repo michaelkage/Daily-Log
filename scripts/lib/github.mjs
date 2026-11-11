@@ -1,4 +1,4 @@
-const token = process.env.GITHUB_TOKEN;
+const token = process.env.GH_ACTIVITY_TOKEN || process.env.GITHUB_TOKEN;
 const repository = process.env.GITHUB_REPOSITORY;
 
 if (!token || !repository) {
