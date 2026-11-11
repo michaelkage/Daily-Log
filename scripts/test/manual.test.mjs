@@ -27,5 +27,5 @@ test("simulation models the real archive path, issue fields, activity markers an
   }
   assert.match(html, /ACTIVITY:START/);
   assert.match(html, /schema_version:1/);
-  assert.match(html, /No false empty-activity result is written/);
+  assert.match(html, /no false empty-activity result is written/i);
 });
