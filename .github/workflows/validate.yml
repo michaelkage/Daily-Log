@@ -1,0 +1,32 @@
+name: Validate automation scripts
+
+on:
+  pull_request:
+    paths:
+      - "scripts/**"
+      - ".github/workflows/**"
+      - ".github/ISSUE_TEMPLATE/**"
+      - "template.md"
+      - "README.md"
+  push:
+    branches: [main]
+    paths:
+      - "scripts/**"
+      - ".github/workflows/**"
+
+permissions:
+  contents: read
+
+jobs:
+  node-syntax:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Check JavaScript syntax
+        run: |
+          while IFS= read -r file; do
+            node --check "$file"
+          done < <(find scripts -type f -name '*.mjs' -print)
