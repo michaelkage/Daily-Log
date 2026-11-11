@@ -16,6 +16,10 @@ Public engineering journal — experiments, shipped work, lessons, and next step
 
 Browse the complete history in [logs/](logs/) and weekly reviews in [weekly/](weekly/).
 
+### Portfolio integration
+
+Fetch [latest.json](latest.json) for the latest highlight, entry URL, total log count, and current streak. The daily automation refreshes this machine-readable file with the dashboard.
+
 ### Capture a day
 
 [Open a Daily Log issue](../../issues/new?template=daily-log.yml) to record your progress without editing Markdown by hand.
