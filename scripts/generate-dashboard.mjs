@@ -49,6 +49,10 @@ ${rows.length ? rows.map((item) => `| [${item.date}](${item.path}) | ${escapeCel
 
 Browse the complete history in [logs/](logs/) and weekly reviews in [weekly/](weekly/).
 
+### Portfolio integration
+
+Fetch [latest.json](latest.json) for the latest highlight, entry URL, total log count, and current streak. This file is generated alongside the dashboard for portfolio integrations.
+
 ### Capture a day
 
 [Open a Daily Log issue](../../issues/new?template=daily-log.yml) to record your progress without editing Markdown by hand.
