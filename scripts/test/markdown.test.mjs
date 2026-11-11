@@ -65,7 +65,10 @@ test("removes duplicate sections left by older capture runs", () => {
     "---",
     "",
   ].join("\n");
-  const result = replaceMarkdownSection(source, "Shipped", "- corrected");
+  let result = source;
+  for (const heading of ["Shipped", "Learned", "Blockers", "Tomorrow"]) {
+    result = replaceMarkdownSection(result, heading, "- corrected " + heading.toLowerCase());
+  }
 
   assert.equal((result.match(/^#{2,6} Shipped$/gm) ?? []).length, 1);
   assert.doesNotMatch(result, /stale duplicate/);
