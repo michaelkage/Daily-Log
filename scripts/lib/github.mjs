@@ -1,4 +1,5 @@
-const token = process.env.GH_ACTIVITY_TOKEN || process.env.GITHUB_TOKEN;
+const token = process.env.GITHUB_TOKEN;
+const activityToken = process.env.GH_ACTIVITY_TOKEN || token;
 const repository = process.env.GITHUB_REPOSITORY;
 
 if (!token || !repository) {
@@ -8,12 +9,12 @@ if (!token || !repository) {
 const [owner, repo] = repository.split("/");
 if (!owner || !repo) throw new Error(`Invalid repository: ${repository}`);
 
-export async function api(path, options = {}) {
+export async function api(path, options = {}, accessToken = token) {
   const response = await fetch(`https://api.github.com${path}`, {
     ...options,
     headers: {
       Accept: "application/vnd.github+json",
-      Authorization: `Bearer ${token}`,
+      Authorization: `Bearer ${accessToken}`,
       "X-GitHub-Api-Version": "2022-11-28",
       ...(options.body ? { "Content-Type": "application/json" } : {}),
       ...options.headers,
@@ -25,6 +26,10 @@ export async function api(path, options = {}) {
   }
   if (response.status === 204) return null;
   return response.json();
+}
+
+export async function activityApi(path, options = {}) {
+  return api(path, options, activityToken);
 }
 
 export async function getFile(path) {
