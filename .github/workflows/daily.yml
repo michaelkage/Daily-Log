@@ -1,0 +1,39 @@
+name: Daily log automation
+
+on:
+  schedule:
+    - cron: "5 0 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  issues: read
+
+concurrency:
+  group: daily-log-automation
+  cancel-in-progress: false
+
+jobs:
+  create-and-enrich:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Create today's entry
+        run: node scripts/create-daily-log.mjs
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+      - name: Collect GitHub activity
+        run: node scripts/collect-activity.mjs
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+          GH_ACTIVITY_REPOS: ${{ vars.GH_ACTIVITY_REPOS }}
+      - name: Rebuild dashboard
+        run: node scripts/generate-dashboard.mjs
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
