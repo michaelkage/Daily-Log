@@ -1,8 +1,8 @@
 <!-- START -->
 ## 📊 Engineering Dashboard
 
-![Total logs](https://img.shields.io/badge/logs-0-2563eb?style=flat-square)
-![Current streak](https://img.shields.io/badge/current%20streak-0%20days-16a34a?style=flat-square)
+![Total logs](https://img.shields.io/badge/logs-1-2563eb?style=flat-square)
+![Current streak](https://img.shields.io/badge/current%20streak-1%20day-16a34a?style=flat-square)
 
 Public engineering journal — experiments, shipped work, lessons, and next steps.
 
@@ -10,7 +10,7 @@ Public engineering journal — experiments, shipped work, lessons, and next step
 
 | Date (UTC) | Highlight | Tags |
 |---|---|---|
-| No entries yet | Your first log will appear here | — |
+| [2026-11-11](logs/2026/11/2026-11-11.md) | Daily engineering log | — |
 
 ### Archive
 
