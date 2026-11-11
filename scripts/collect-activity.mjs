@@ -34,7 +34,9 @@ for (const fullName of repositories) {
     const recentReleases = releases.filter((item) => item.published_at && item.published_at >= since.toISOString() && item.published_at <= until.toISOString());
     for (const item of recentCommits) {
       const message = item.commit.message.split("\n")[0].replaceAll("\r", "");
-      sections.push(`- **${fullName}** — [${escapeMarkdown(message)}](${item.html_url})`);
+      const isLogNote = /\\[log\\]/i.test(message);
+      const category = isLogNote ? " log note" : "";
+      sections.push(`- **${fullName}${category}** — [${escapeMarkdown(message)}](${item.html_url})`);
     }
     for (const item of recentPulls) sections.push(`- **${fullName} PR** — [#${item.number} ${escapeMarkdown(item.title)}](${item.html_url})`);
     for (const item of recentReleases) sections.push(`- **${fullName} release** — [${escapeMarkdown(item.name || item.tag_name)}](${item.html_url})`);
