@@ -23,8 +23,8 @@ test("account discovery paginates and combines discovered and configured reposit
   };
   const repos = await discoverRepositories(api, "owner/daily-log", ["owner/extra"], true);
   assert.equal(calls.length, 2);
-  assert.equal(repos.length, 103);
-  assert.equal(repos[0], "owner/daily-log");
+  assert.equal(repos.length, 102);
+  assert.ok(!repos.includes("owner/daily-log"));
   assert.ok(repos.includes("owner/last"));
   assert.ok(repos.includes("owner/extra"));
 });
