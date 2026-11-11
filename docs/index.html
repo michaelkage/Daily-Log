@@ -292,6 +292,22 @@ README.md               generated dashboard</div>
         <p style="font-size:9px;color:var(--stone)">Set <code>GH_ACTIVITY_REPOS</code> as an Actions variable and <code>GH_ACTIVITY_TOKEN</code> as a secret. If absent, the activity reader falls back to <code>GITHUB_TOKEN</code>. Writes always use <code>GITHUB_TOKEN</code>.</p>
       </div>
     </div>
+    <section class="arch-box" style="margin-top:14px">
+      <h3>Local invocation / Node.js 22</h3>
+      <p style="font-size:9px;color:var(--stone)">These are the scripts called by the workflows. They use GitHub's API to read and commit repository files; they are not local-file-only commands.</p>
+      <div class="command"><code>export GITHUB_TOKEN="ghp_…"
+export GITHUB_REPOSITORY="owner/repository"
+
+node scripts/migrate-legacy-logs.mjs
+node scripts/create-daily-log.mjs
+node scripts/collect-activity.mjs
+node scripts/generate-dashboard.mjs
+
+ISSUE_NUMBER=123 node scripts/issue-to-log.mjs
+node scripts/weekly-summary.mjs
+node --test scripts/test/*.test.mjs</code></div>
+      <p style="font-size:9px;color:var(--stone)">Use a token with repository contents write access (and issues read access for issue capture). Configure <code>GH_ACTIVITY_REPOS</code> and optional <code>GH_ACTIVITY_TOKEN</code> for external activity reads. The workflows inject the required variables automatically.</p>
+    </section>
     <div class="note" style="margin-top:12px">There is no package.json, dependency install, local CLI wrapper, database, server process, or separate backend in the current tree. The scripts are Node.js ES modules that use built-in fetch, Buffer and the Node test runner.</div>
   </section>
 
@@ -421,7 +437,7 @@ README.md               generated dashboard</div>
   function createEntry(){
     const input=currentInput();
     if(!input.date||!/^\d{4}-\d{2}-\d{2}$/.test(input.date))throw new Error("Enter a valid UTC date.");
-    if(input.date==="2026-11-11")throw new Error("That archive path already exists in the inspected repository. Choose another date.");
+    if(input.date<="2026-11-11")throw new Error("The inspected archive already contains 2026-11-11. Choose a later date for this new-entry simulation.");
     const parsed=new Date(input.date+"T00:00:00Z");
     if(Number.isNaN(parsed.valueOf())||parsed.toISOString().slice(0,10)!==input.date)throw new Error("Date is not a real calendar day.");
     const [year,month]=input.date.split("-");
@@ -435,6 +451,7 @@ README.md               generated dashboard</div>
   function captureIssue(){
     if(state.step<1)throw new Error("Create the daily entry first.");
     const input=currentInput();
+    if(!input.Shipped)throw new Error("Shipped is required by the repository issue form.");
     const issueBody="### Log date (UTC)\n\n"+input.date+"\n\n"+headings.map(heading=>"### "+heading+"\n\n"+(input[heading]||"_No response_")).join("\n\n");
     for(const heading of headings){
       const fieldPattern=new RegExp("^### "+escapeRegExp(heading)+"\\s*\\r?\\n+([\\s\\S]*?)(?=^### |$(?![\\s\\S]))","m");
@@ -449,7 +466,7 @@ README.md               generated dashboard</div>
     if($("api-failure").checked){
       state.activityFailed=true;
       state.step=2;render();
-      throw new Error("Activity collection failed for every configured repository. The existing activity block is preserved; no false empty-activity result is written.");
+      throw new Error("Activity collection failed for every configured repository. The daily entry remains unchanged; no false empty-activity result is written.");
     }
     const marker=/<!-- ACTIVITY:START -->[\s\S]*?<!-- ACTIVITY:END -->/;
     const block="<!-- ACTIVITY:START -->\n## Shipped Today (GitHub activity)\n_Simulation: no commits, merged pull requests, or releases in the last 24 hours._\n<!-- ACTIVITY:END -->";
