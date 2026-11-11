@@ -21,7 +21,9 @@ export async function discoverRepositories(api, currentRepository, configuredRep
     }
   }
 
-  const repositories = [...new Set([currentRepository, ...discovered, ...configuredRepositories])];
+  // The journal repository is the collector itself, not one of the user's other project repositories.
+  // It can still be added explicitly through GH_ACTIVITY_REPOS if desired.
+  const repositories = [...new Set([...discovered.filter((item) => item !== currentRepository), ...configuredRepositories])];
   const invalid = repositories.filter((item) => !REPOSITORY_PATTERN.test(item));
   if (invalid.length) throw new Error("Invalid repository setting(s): " + invalid.join(", "));
   return repositories;
