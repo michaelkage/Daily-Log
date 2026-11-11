@@ -367,7 +367,7 @@ README.md               generated dashboard</div>
     for(const duplicate of matches.slice(1).reverse()){
       const level=duplicate[1].length;
       let start=duplicate.index+duplicate[0].length;
-      if(markdown.slice(start,start+2)==="\\r\n")start+=2;
+      if(markdown.slice(start,start+2)==="\r\n")start+=2;
       else if(markdown[start]==="\n")start++;
       const boundary=new RegExp("^#{1,"+level+"}[ \\t]+|^---[ \\t]*$|^<!-- ACTIVITY:START -->$|^<!-- ACTIVITY:END -->$","gm");
       boundary.lastIndex=start;
@@ -380,7 +380,7 @@ README.md               generated dashboard</div>
     const match=pattern.exec(markdown);
     if(!match)return markdown.trimEnd()+"\n\n## "+heading+"\n"+value.trim()+"\n";
     let start=match.index+match[0].length;
-    if(markdown.slice(start,start+2)==="\\r\n")start+=2;
+    if(markdown.slice(start,start+2)==="\r\n")start+=2;
     else if(markdown[start]==="\n")start++;
     const boundary=new RegExp("^#{1,"+match[1].length+"}[ \\t]+|^---[ \\t]*$|^<!-- ACTIVITY:START -->$|^<!-- ACTIVITY:END -->$","gm");
     boundary.lastIndex=start;
@@ -448,9 +448,8 @@ README.md               generated dashboard</div>
     if(state.step<2)throw new Error("Capture issue answers before activity collection.");
     if($("api-failure").checked){
       state.activityFailed=true;
-      addEvent("All activity repository requests failed; existing activity block preserved and job marked failed.","bad");
       state.step=2;render();
-      throw new Error("Activity collection failed for every configured repository. No false empty-activity result was written.");
+      throw new Error("Activity collection failed for every configured repository. The existing activity block is preserved; no false empty-activity result is written.");
     }
     const marker=/<!-- ACTIVITY:START -->[\s\S]*?<!-- ACTIVITY:END -->/;
     const block="<!-- ACTIVITY:START -->\n## Shipped Today (GitHub activity)\n_Simulation: no commits, merged pull requests, or releases in the last 24 hours._\n<!-- ACTIVITY:END -->";
@@ -471,8 +470,8 @@ README.md               generated dashboard</div>
       latest_entry:{
         date:date,
         path:state.path,
-        highlight:currentInput().Shipped||"Daily engineering log",
-        tags:[],
+        highlight:(currentInput().Shipped.split(/\r?\n/).map(line=>line.replace(/^\s*[-*]\s*/,"").trim()).find(Boolean)||"Daily engineering log").replace(/^_+|_+$/g,"").slice(0,180),
+        tags:[...state.markdown.matchAll(/(?:^|\s)#([a-zA-Z0-9_-]+)/g)].map(match=>match[1]).slice(0,4),
         url:"https://github.com/"+(repo||"michaelkage/Daily-Log")+"/blob/main/"+state.path
       }
     };
