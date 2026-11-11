@@ -12,24 +12,28 @@ const [year, month] = date.split("-");
 const path = `logs/${year}/${month}/${date}.md`;
 
 const fields = Object.fromEntries(["Shipped", "Learned", "Blockers", "Tomorrow"].map((label) => {
-  const match = issue.body.match(new RegExp(`^### ${label}\\s*\\r?\\n+([\\s\\S]*?)(?=^### |\\s*$)`, "m"));
+  const escaped = label.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  const match = issue.body.match(new RegExp(`^### ${escaped}\\s*\\r?\\n+([\\s\\S]*?)(?=^### |$(?![\\s\\S]))`, "m"));
   const value = (match?.[1] ?? "").trim();
   return [label, value && value !== "_No response_" ? value : "_Not provided._"];
 }));
 
 let file = await getFile(path);
 let content = file?.content ?? `# Daily Log — ${date}\n\n**Day:** Captured from issue [#${number}](${issue.html_url})\n`;
-const updates = [
-  ["Shipped", fields.Shipped],
-  ["Learned", fields.Learned],
-  ["Blockers", fields.Blockers],
-  ["Tomorrow", fields.Tomorrow],
-];
-for (const [heading, value] of updates) {
-  const section = new RegExp(`(^### ${heading}\\s*\\n)[\\s\\S]*?(?=^### |\\s*$)`, "m");
-  if (section.test(content)) content = content.replace(section, `### ${heading}\n${value}\n\n`);
-  else content = `${content.trimEnd()}\n\n### ${heading}\n${value}\n`;
+for (const [heading, value] of Object.entries(fields)) {
+  content = replaceSection(content, heading, value);
 }
 if (!content.includes(`[issue #${number}]`)) content += `\n_Source: [issue #${number}](${issue.html_url})_\n`;
 await putFile(path, content, `docs(log): save issue #${number} as ${date}`, file?.sha);
 console.log(`Saved issue #${number} to ${path}.`);
+
+function replaceSection(markdown, heading, value) {
+  const marker = `### ${heading}`;
+  const start = markdown.indexOf(marker);
+  if (start < 0) return `${markdown.trimEnd()}\n\n${marker}\n${value}\n`;
+  const contentStart = markdown.indexOf("\n", start) + 1;
+  if (contentStart === 0) throw new Error(`Malformed section heading: ${heading}`);
+  const nextHeading = markdown.indexOf("\n### ", contentStart);
+  const suffix = nextHeading < 0 ? "" : markdown.slice(nextHeading + 1);
+  return `${markdown.slice(0, contentStart)}${value}\n\n${suffix}`;
+}
