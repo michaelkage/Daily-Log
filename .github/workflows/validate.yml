@@ -4,6 +4,7 @@ on:
   pull_request:
     paths:
       - "scripts/**"
+      - "docs/**"
       - ".github/workflows/**"
       - ".github/ISSUE_TEMPLATE/**"
       - "template.md"
