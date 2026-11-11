@@ -356,13 +356,8 @@ README.md               generated dashboard</div>
 
   const $ = (id) => document.getElementById(id);
   const state = {step:-1, markdown:"", json:null, path:"", events:[], generated:false, activityFailed:false};
-  const template = "# Daily Log — {{DATE}}\\n\\n**Day:** {{DAY_NUMBER}}  \\n**Status:** 🟢 Online\\n\\n## Shipped\\n- \\n\\n## Learned\\n- \\n\\n## Blockers\\n- \\n\\n## Tomorrow\\n- \\n\\n{{GITHUB_ACTIVITY}}\\n\\n---\\n";
-  const seed = {
-    date:"2026-11-11",
-    markdown:"# Daily Log — 2026-11-11\\n\\n**Day:** 1  \\n**Status:** 🟢 Online\\n\\n## Shipped\\n- \\n\\n## Learned\\n- \\n\\n## Blockers\\n- \\n\\n## Tomorrow\\n- \\n\\n<!-- ACTIVITY:START -->\\n### Shipped Today (GitHub activity)\\n_Activity will be collected automatically._\\n<!-- ACTIVITY:END -->\\n\\n---\\n"
-  };
+  const template = "# Daily Log — {{DATE}}\n\n**Day:** {{DAY_NUMBER}}  \n**Status:** 🟢 Online\n\n## Shipped\n- \n\n## Learned\n- \n\n## Blockers\n- \n\n## Tomorrow\n- \n\n{{GITHUB_ACTIVITY}}\n\n---\n";
   const headings=["Shipped","Learned","Blockers","Tomorrow"];
-  const steps=["Create daily entry","Capture issue answers","Collect GitHub activity","Rebuild dashboard"];
   const escapeRegExp = (s) => s.replace(/[.*+?^{}()|[\]\\]/g,"\\$&").replaceAll("$","\\$");
 
   function replaceSection(markdown,heading,value){
@@ -372,26 +367,26 @@ README.md               generated dashboard</div>
     for(const duplicate of matches.slice(1).reverse()){
       const level=duplicate[1].length;
       let start=duplicate.index+duplicate[0].length;
-      if(markdown.slice(start,start+2)==="\\r\\n")start+=2;
-      else if(markdown[start]==="\\n")start++;
+      if(markdown.slice(start,start+2)==="\\r\n")start+=2;
+      else if(markdown[start]==="\n")start++;
       const boundary=new RegExp("^#{1,"+level+"}[ \\t]+|^---[ \\t]*$|^<!-- ACTIVITY:START -->$|^<!-- ACTIVITY:END -->$","gm");
       boundary.lastIndex=start;
       const hit=boundary.exec(markdown);
       const end=hit?hit.index:markdown.length;
-      const before=markdown.slice(0,duplicate.index).replace(/\\n+$/,"");
-      const after=markdown.slice(end).replace(/^\\n+/,"");
-      markdown=before+(before?"\\n\\n":"")+after;
+      const before=markdown.slice(0,duplicate.index).replace(/\n+$/,"");
+      const after=markdown.slice(end).replace(/^\n+/,"");
+      markdown=before+(before?"\n\n":"")+after;
     }
     const match=pattern.exec(markdown);
-    if(!match)return markdown.trimEnd()+"\\n\\n## "+heading+"\\n"+value.trim()+"\\n";
+    if(!match)return markdown.trimEnd()+"\n\n## "+heading+"\n"+value.trim()+"\n";
     let start=match.index+match[0].length;
-    if(markdown.slice(start,start+2)==="\\r\\n")start+=2;
-    else if(markdown[start]==="\\n")start++;
+    if(markdown.slice(start,start+2)==="\\r\n")start+=2;
+    else if(markdown[start]==="\n")start++;
     const boundary=new RegExp("^#{1,"+match[1].length+"}[ \\t]+|^---[ \\t]*$|^<!-- ACTIVITY:START -->$|^<!-- ACTIVITY:END -->$","gm");
     boundary.lastIndex=start;
     const hit=boundary.exec(markdown);
     const end=hit?hit.index:markdown.length;
-    return markdown.slice(0,start)+value.trim()+"\\n\\n"+markdown.slice(end).replace(/^\\n+/,"");
+    return markdown.slice(0,start)+value.trim()+"\n\n"+markdown.slice(end).replace(/^\n+/,"");
   }
   function addEvent(message,kind){
     state.events.push({message,kind:kind||"ok",time:new Date().toISOString().slice(11,19)+"Z"});
@@ -425,7 +420,8 @@ README.md               generated dashboard</div>
   }
   function createEntry(){
     const input=currentInput();
-    if(!input.date||!/^\\d{4}-\\d{2}-\\d{2}$/.test(input.date))throw new Error("Enter a valid UTC date.");
+    if(!input.date||!/^\d{4}-\d{2}-\d{2}$/.test(input.date))throw new Error("Enter a valid UTC date.");
+    if(input.date==="2026-11-11")throw new Error("That archive path already exists in the inspected repository. Choose another date.");
     const parsed=new Date(input.date+"T00:00:00Z");
     if(Number.isNaN(parsed.valueOf())||parsed.toISOString().slice(0,10)!==input.date)throw new Error("Date is not a real calendar day.");
     const [year,month]=input.date.split("-");
@@ -439,11 +435,13 @@ README.md               generated dashboard</div>
   function captureIssue(){
     if(state.step<1)throw new Error("Create the daily entry first.");
     const input=currentInput();
+    const issueBody="### Log date (UTC)\n\n"+input.date+"\n\n"+headings.map(heading=>"### "+heading+"\n\n"+(input[heading]||"_No response_")).join("\n\n");
     for(const heading of headings){
-      const value=input[heading]||"_Not provided._";
-      state.markdown=replaceSection(state.markdown,heading,value);
+      const fieldPattern=new RegExp("^### "+escapeRegExp(heading)+"\\s*\\r?\\n+([\\s\\S]*?)(?=^### |$(?![\\s\\S]))","m");
+      const value=(issueBody.match(fieldPattern)?.[1]||"").trim();
+      state.markdown=replaceSection(state.markdown,heading,value&&value!=="_No response_"?value:"_Not provided._");
     }
-    addEvent("Closed Daily log: issue; parsed four form fields and replaced matching Markdown sections.");
+    addEvent("Closed Daily log: issue; parsed UTC date and four GitHub Issue Form fields.");
     state.step=2;render();
   }
   function collectActivity(){
@@ -454,10 +452,10 @@ README.md               generated dashboard</div>
       state.step=2;render();
       throw new Error("Activity collection failed for every configured repository. No false empty-activity result was written.");
     }
-    const marker=/<!-- ACTIVITY:START -->[\\s\\S]*?<!-- ACTIVITY:END -->/;
-    const block="<!-- ACTIVITY:START -->\\n## Shipped Today (GitHub activity)\\n_Simulation: no commits, merged pull requests, or releases in the last 24 hours._\\n<!-- ACTIVITY:END -->";
+    const marker=/<!-- ACTIVITY:START -->[\s\S]*?<!-- ACTIVITY:END -->/;
+    const block="<!-- ACTIVITY:START -->\n## Shipped Today (GitHub activity)\n_Simulation: no commits, merged pull requests, or releases in the last 24 hours._\n<!-- ACTIVITY:END -->";
     if(marker.test(state.markdown))state.markdown=state.markdown.replace(marker,block);
-    else state.markdown=state.markdown.trimEnd()+"\\n\\n"+block+"\\n";
+    else state.markdown=state.markdown.trimEnd()+"\n\n"+block+"\n";
     state.activityFailed=false;state.step=3;
     addEvent("Activity block replaced. Demo uses an empty successful response; no live activity is written.");
     render();
@@ -475,7 +473,7 @@ README.md               generated dashboard</div>
         path:state.path,
         highlight:currentInput().Shipped||"Daily engineering log",
         tags:[],
-        url:"https://github.com/michaelkage/Daily-Log/blob/main/"+state.path
+        url:"https://github.com/"+(repo||"michaelkage/Daily-Log")+"/blob/main/"+state.path
       }
     };
     state.step=4;
@@ -496,7 +494,7 @@ README.md               generated dashboard</div>
     $("trace-preview").textContent="No events yet.";
     render();
   }
-  $("log-date").value=new Date().toISOString().slice(0,10);
+  $("log-date").value="2026-11-12";
   $("run-all").addEventListener("click",()=>{
     reset();
     for(let i=0;i<4;i++){
@@ -529,13 +527,13 @@ README.md               generated dashboard</div>
     const host=window.location.hostname.toLowerCase();
     const parts=window.location.pathname.split("/").filter(Boolean).map(decodeURIComponent);
     const query=new URLSearchParams(window.location.search).get("repo");
-    if(query&&/^[A-Za-z0-9_.-]+\\/[A-Za-z0-9_.-]+$/.test(query))return query;
+    if(query&&/^[A-Za-z0-9_.-]+\/[A-Za-z0-9_.-]+$/.test(query))return query;
     if(host.endsWith(".github.io")){
       const owner=host.slice(0,-".github.io".length);
       const name=parts[0]||owner+".github.io";
       return owner+"/"+name;
     }
-    if(host==="github.com"&&parts.length>=2)return parts[0]+"/"+parts[1].replace(/\\.git$/,"");
+    if(host==="github.com"&&parts.length>=2)return parts[0]+"/"+parts[1].replace(/\.git$/,"");
     return null;
   }
   const repo=detectRepository();
@@ -618,7 +616,7 @@ README.md               generated dashboard</div>
     if(commit.status==="fulfilled"&&commit.value.length){
       const c=commit.value[0];const date=c.commit.committer.date||c.commit.author.date;
       $("commit-date").textContent=formatDate(date);
-      $("commit-detail").textContent=c.commit.message.split("\\n")[0]+" · "+c.sha.slice(0,7);
+      $("commit-detail").textContent=c.commit.message.split("\n")[0]+" · "+c.sha.slice(0,7);
       const a=document.createElement("a");a.href=c.html_url;a.target="_blank";a.rel="noopener noreferrer";a.textContent="Inspect latest commit ↗";$("commit-detail").append(document.createTextNode(" · "),a);
     }else{
       $("commit-date").textContent="Unavailable";
