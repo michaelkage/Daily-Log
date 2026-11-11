@@ -7,8 +7,27 @@ export function replaceMarkdownSection(markdown, heading, value) {
 
   const escaped = heading.replace(/[.*+?^{}()|[\]\\]/g, "\\$&").replaceAll("$", "\\$");
   const headingPattern = new RegExp("^(#{1,6})[ \\t]+" + escaped + "[ \\t]*\\r?$", "gm");
-  const match = headingPattern.exec(markdown);
+  const matches = [...markdown.matchAll(headingPattern)];
 
+  for (const duplicate of matches.slice(1).reverse()) {
+    const level = duplicate[1].length;
+    let contentStart = duplicate.index + duplicate[0].length;
+    if (markdown.slice(contentStart, contentStart + 2) === "\r\n") contentStart += 2;
+    else if (markdown[contentStart] === "\n") contentStart += 1;
+
+    const boundaryPattern = new RegExp(
+      "^#{1," + level + "}[ \\t]+|^---[ \\t]*$|^<!-- ACTIVITY:START -->$|^<!-- ACTIVITY:END -->$",
+      "gm",
+    );
+    boundaryPattern.lastIndex = contentStart;
+    const boundary = boundaryPattern.exec(markdown);
+    const end = boundary ? boundary.index : markdown.length;
+    const before = markdown.slice(0, duplicate.index).replace(/\n+$/, "");
+    const after = markdown.slice(end).replace(/^\n+/, "");
+    markdown = before + (before ? "\n\n" : "") + after;
+  }
+
+  const match = headingPattern.exec(markdown);
   if (!match) {
     return markdown.trimEnd() + "\n\n## " + heading + "\n" + value.trim() + "\n";
   }
@@ -25,8 +44,6 @@ export function replaceMarkdownSection(markdown, heading, value) {
   boundaryPattern.lastIndex = contentStart;
   const boundary = boundaryPattern.exec(markdown);
   const end = boundary ? boundary.index : markdown.length;
-  const prefix = markdown.slice(0, contentStart);
-  const suffix = markdown.slice(end);
 
-  return prefix + value.trim() + "\n\n" + suffix.replace(/^\n+/, "");
+  return markdown.slice(0, contentStart) + value.trim() + "\n\n" + markdown.slice(end).replace(/^\n+/, "");
 }
