@@ -2,7 +2,7 @@ import { activityApi as api, getFile, putFile } from "./lib/github.mjs";
 import { collectRepositoryActivity, discoverRepositories, parseRepositoryList, renderActivityBlock } from "./lib/activity.mjs";
 
 const repository = process.env.GITHUB_REPOSITORY;
-if (!repository || !/^[^/]+\\/[^/]+$/.test(repository)) {
+if (!repository || !/^[^/]+\/[^/]+$/.test(repository)) {
   throw new Error("GITHUB_REPOSITORY must be in owner/repository format.");
 }
 
@@ -40,7 +40,7 @@ for (const fullName of repositories) {
     if (result) results.push(result);
     else console.log("Skipping " + fullName + ": no commits in the last 24 hours.");
   } catch (error) {
-    const reason = String(error?.message ?? error).split("\\n")[0].slice(0, 240);
+    const reason = String(error?.message ?? error).split("\n")[0].slice(0, 240);
     failures.push({ repository: fullName, reason });
     console.warn("Activity unavailable for " + fullName + ": " + reason);
   }
@@ -54,10 +54,10 @@ if (results.length === 0 && failures.length === repositories.length) {
 }
 
 const block = renderActivityBlock(results, failures);
-const pattern = /<!-- ACTIVITY:START -->[\\s\\S]*?<!-- ACTIVITY:END -->/;
+const pattern = /<!-- ACTIVITY:START -->[\s\S]*?<!-- ACTIVITY:END -->/;
 let content = entry.content;
 if (pattern.test(content)) content = content.replace(pattern, block);
-else content = content.trimEnd() + "\\n\\n" + block + "\\n";
+else content = content.trimEnd() + "\n\n" + block + "\n";
 
 await putFile(path, content, "chore(log): enrich " + date + " with repository activity", entry.sha);
 console.log(
