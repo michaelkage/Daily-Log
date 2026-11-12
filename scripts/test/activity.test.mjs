@@ -29,6 +29,16 @@ test("account discovery paginates and combines discovered and configured reposit
   assert.ok(repos.includes("owner/extra"));
 });
 
+test("missing account token and empty configuration produce a safe no-op repository set", async () => {
+  let called = false;
+  const repos = await discoverRepositories(async () => {
+    called = true;
+    throw new Error("Account discovery must not run without an account token.");
+  }, "owner/daily-log", [], false);
+  assert.deepEqual(repos, []);
+  assert.equal(called, false);
+});
+
 test("repositories without commits are skipped without requesting other details", async () => {
   const calls = [];
   const api = async (path) => { calls.push(path); return []; };

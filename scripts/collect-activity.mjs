@@ -10,12 +10,20 @@ const configured = parseRepositoryList(process.env.GH_ACTIVITY_REPOS);
 const hasAccountToken = Boolean(process.env.GH_ACTIVITY_TOKEN);
 if (!hasAccountToken && configured.length === 0) {
   console.warn(
-    "GH_ACTIVITY_TOKEN is not configured. Only the Daily-Log repository can be scanned. " +
-    "Add a read-only token as the GH_ACTIVITY_TOKEN Actions secret to discover your account repositories automatically."
+    "GH_ACTIVITY_TOKEN is not configured. Account-wide discovery is disabled. " +
+    "Add a read-only token as the GH_ACTIVITY_TOKEN Actions secret, or configure explicit repositories with GH_ACTIVITY_REPOS."
   );
 }
 
 const repositories = await discoverRepositories(api, repository, configured, hasAccountToken);
+if (repositories.length === 0) {
+  console.log(
+    "No activity repositories are configured or discoverable. Skipping collection without modifying the daily entry. " +
+    "Configure GH_ACTIVITY_TOKEN or GH_ACTIVITY_REPOS to enable project activity."
+  );
+  process.exit(0);
+}
+
 const until = new Date();
 const since = new Date(until.getTime() - 24 * 60 * 60 * 1000);
 const date = until.toISOString().slice(0, 10);
