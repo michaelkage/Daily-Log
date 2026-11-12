@@ -11,7 +11,7 @@ const since = new Date("2026-11-10T00:00:00.000Z");
 const until = new Date("2026-11-11T00:00:00.000Z");
 
 test("repository list accepts commas and newlines and removes duplicates", () => {
-  assert.deepEqual(parseRepositoryList("a/one, b/two\na/one"), ["a/one", "b/two"]);
+  assert.deepEqual(parseRepositoryList("a/one, b/two\\na/one"), ["a/one", "b/two"]);
 });
 
 test("account discovery paginates and combines discovered and configured repositories", async () => {
@@ -29,13 +29,23 @@ test("account discovery paginates and combines discovered and configured reposit
   assert.ok(repos.includes("owner/extra"));
 });
 
+test("missing account token and empty configuration produce a safe no-op repository set", async () => {
+  let called = false;
+  const repos = await discoverRepositories(async () => {
+    called = true;
+    throw new Error("Account discovery must not run without an account token.");
+  }, "owner/daily-log", [], false);
+  assert.deepEqual(repos, []);
+  assert.equal(called, false);
+});
+
 test("repositories without commits are skipped without requesting other details", async () => {
   const calls = [];
   const api = async (path) => { calls.push(path); return []; };
   const result = await collectRepositoryActivity(api, "owner/quiet", since, until);
   assert.equal(result, null);
   assert.equal(calls.length, 1);
-  assert.match(calls[0], /\/commits\?/);
+  assert.match(calls[0], /\\/commits\\?/);
 });
 
 test("active repository captures commit details and related merged PRs and releases", async () => {
@@ -62,14 +72,14 @@ test("active repository captures commit details and related merged PRs and relea
   assert.equal(result.pulls.length, 1);
   assert.equal(result.releases.length, 1);
   const markdown = renderActivityBlock([result]);
-  assert.match(markdown, /owner\/app/);
+  assert.match(markdown, /owner\\/app/);
   assert.match(markdown, /Ship feature/);
   assert.match(markdown, /Feature PR/);
-  assert.match(markdown, /v1\.0/);
+  assert.match(markdown, /v1\\.0/);
 });
 
 test("empty activity says no repositories had commits and reports scan failures", () => {
   const markdown = renderActivityBlock([], [{ repository: "owner/private", reason: "403 denied" }]);
   assert.match(markdown, /No repositories had commits/);
-  assert.match(markdown, /owner\/private/);
+  assert.match(markdown, /owner\\/private/);
 });
