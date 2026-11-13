@@ -1,8 +1,8 @@
 <!-- START -->
 ## 📊 Engineering Dashboard
 
-![Total logs](https://img.shields.io/badge/logs-1-2563eb?style=flat-square)
-![Current streak](https://img.shields.io/badge/current%20streak-1%20day-16a34a?style=flat-square)
+![Total logs](https://img.shields.io/badge/logs-3-2563eb?style=flat-square)
+![Current streak](https://img.shields.io/badge/current%20streak-3%20days-16a34a?style=flat-square)
 
 Public engineering journal — experiments, shipped work, lessons, and next steps.
 
@@ -10,6 +10,8 @@ Public engineering journal — experiments, shipped work, lessons, and next step
 
 | Date (UTC) | Highlight | Tags |
 |---|---|---|
+| [2026-11-13](logs/2026/11/2026-11-13.md) | Daily engineering log | — |
+| [2026-11-12](logs/2026/11/2026-11-12.md) | Daily engineering log | — |
 | [2026-11-11](logs/2026/11/2026-11-11.md) | Daily engineering log | — |
 
 ### Archive
@@ -18,7 +20,7 @@ Browse the complete history in [logs/](logs/) and weekly reviews in [weekly/](we
 
 ### Portfolio integration
 
-Fetch [latest.json](latest.json) for the latest highlight, entry URL, total log count, and current streak. The daily automation refreshes this machine-readable file with the dashboard.
+Fetch [latest.json](latest.json) for the latest highlight, entry URL, total log count, and current streak. This file is generated alongside the dashboard for portfolio integrations.
 
 ### Capture a day
 
@@ -26,7 +28,7 @@ Fetch [latest.json](latest.json) for the latest highlight, entry URL, total log 
 
 ### Configuration
 
-Add a `GH_ACTIVITY_TOKEN` Actions secret containing a fine-grained personal access token with read-only **Contents**, **Pull requests**, and **Metadata** permissions for the repositories you want scanned. The daily collector discovers repositories available to that token automatically; no repository list is required. A repository is recorded only when it has at least one commit in the previous 24 hours, then its commit details and any merged PRs/releases from that same window are added. Repositories with no commits are skipped. Optionally set `GH_ACTIVITY_REPOS` to add specific `owner/repository` names. Without `GH_ACTIVITY_TOKEN`, only this repository and explicitly configured repositories can be scanned.
+Set the repository variable `GH_ACTIVITY_REPOS` to a comma- or newline-separated list of `owner/repository` names to include activity from other repositories. For private or cross-repository access, add a `GH_ACTIVITY_TOKEN` Actions secret with read access to those repositories. Without it, activity collection uses the workflow's repository-scoped token.
 
 <!-- END -->
 
@@ -34,4 +36,4 @@ Add a `GH_ACTIVITY_TOKEN` Actions secret containing a fine-grained personal acce
 
 This repository documents daily engineering progress and lessons learned, building in public one commit at a time.
 
-_Repository established February 3, 2026. The original launch notes are preserved in the repository history._
+_Repository established February 3, 2026. The original launch notes remain in the repository history._
